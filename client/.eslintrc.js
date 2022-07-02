@@ -7,6 +7,9 @@ module.exports = {
     "plugin:react/recommended",
     "airbnb",
     "airbnb/hooks",
+    "plugin:import/errors",
+    "plugin:import/warnings",
+    "plugin:import/typescript",
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
     "prettier",
@@ -22,13 +25,19 @@ module.exports = {
     project: ["./tsconfig.json"],
   },
   plugins: ["react", "react-hooks", "@typescript-eslint", "prettier"],
-  ignorePatterns: [".eslintrc.js"],
+  ignorePatterns: [".eslintrc.js", "postcss.config.js", "tailwind.config.js"],
   rules: {
     "no-use-before-define": "off",
-    "@typescript-eslint/no-use-before-define": "off",
-    "import/prefer-default-export": "off",
+    "@typescript-eslint/no-use-before-define": ["error"],
+    "react/jsx-filename-extension": [
+      "error",
+      {
+        extensions: [".js", ".jsx", ".ts", ".tsx"],
+      },
+    ],
     "import/extensions": [
       "error",
+      "ignorePackages",
       {
         js: "never",
         jsx: "never",
@@ -36,17 +45,10 @@ module.exports = {
         tsx: "never",
       },
     ],
-    "react/jsx-filename-extension": [
-      "error",
+    "react/function-component-definition": [
+      2,
       {
-        extensions: [".jsx", ".tsx"],
-      },
-    ],
-    "react/react-in-jsx-scope": "off",
-    "no-void": [
-      "error",
-      {
-        allowAsStatement: true,
+        namedComponents: "arrow-function",
       },
     ],
     "prettier/prettier": ["error", { endOfLine: "auto" }],
