@@ -24,9 +24,11 @@ module.exports = {
     tsconfigRootDir: __dirname,
     project: ["./tsconfig.json"],
   },
-  plugins: ["react", "react-hooks", "@typescript-eslint", "prettier"],
+  plugins: ["react", "import", "react-hooks", "@typescript-eslint", "prettier"],
   ignorePatterns: [".eslintrc.js", "postcss.config.js", "tailwind.config.js"],
   rules: {
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": ["error"],
     "no-use-before-define": "off",
     "@typescript-eslint/no-use-before-define": ["error"],
     "react/jsx-filename-extension": [
