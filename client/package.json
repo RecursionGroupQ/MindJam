@@ -21,19 +21,13 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "lint": "eslint --ext .ts,.tsx ./src",
-    "fix": "npm run format && npm run lint:fix",
-    "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx}'",
-    "lint:fix": "eslint --fix 'src/**/*.{js,jsx,ts,tsx}'",
+    "format": "eslint --ext .js,.ts,.jsx,.tsx --ignore-path .gitignore . && prettier \"**/*.{js,jsx,ts,tsx}\" --write",
     "prepare": "cd .. && husky install .husky",
     "lint-client": "lint-staged"
   },
   "lint-staged": {
-    "*.{js,ts,tsx,jsx}": [
-      "eslint --quiet --fix"
-    ],
-    "*.{json,md,html,js,jsx,ts,tsx}": [
-      "prettier --write"
+    "src/**/*.{js,jsx,ts,tsx,json}": [
+      "npm run format"
     ]
   },
   "eslintConfig": {
