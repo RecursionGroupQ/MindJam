@@ -1,44 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useRef, useState } from "react";
-import { Stage, Layer, Circle, Line, Text, Group } from "react-konva";
+import React, { useContext } from "react";
+import { Stage, Layer, Circle, Line, Text } from "react-konva";
 import Konva from "konva";
-
-const fills = ["#6B7280", "#EF4444", "#F59E0B", "#10B981", "#3B82F6", "#6366F1", "#8B5CF6", "#EC4899"];
-
-type Node = {
-  id: number;
-  children: number[];
-  text: string;
-  x: number;
-  y: number;
-  isDragging: boolean;
-  fill: string;
-};
-
-const CANVAS_WIDTH = window.innerWidth;
-const CANVAS_HEIGHT = window.innerHeight;
-
-const generateNodes = () => {
-  const nodes = [];
-  for (let i = 0; i < 4; i += 1) {
-    nodes.push({
-      id: i,
-      children: [],
-      text: `node-${i}`,
-      x: Math.random() * CANVAS_WIDTH,
-      y: Math.random() * CANVAS_HEIGHT,
-      fill: fills[Math.floor(Math.random() * fills.length)],
-      isDragging: false,
-    });
-  }
-  return nodes;
-};
-
-const INITIAL_STATE = generateNodes();
+import { Node, RoomContext, fills, CANVAS_WIDTH, CANVAS_HEIGHT } from "./context/RoomContext";
 
 const App = () => {
-  const [nodes, setNodes] = useState<Node[]>(INITIAL_STATE);
-  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const { nodes, setNodes, selectedNode, setSelectedNode } = useContext(RoomContext);
 
   const handleDoubleClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
     const stage = e.target.getStage();
@@ -141,8 +107,6 @@ const App = () => {
                     setNodes(
                       nodes.map((currNode) => {
                         if (selectedNode.id === currNode.id) {
-                          console.log("clicked node children: ", node.children);
-                          console.log("selected node children: ", currNode.children);
                           if (
                             !node.children.includes(currNode.id) &&
                             !currNode.children.includes(node.id) &&
@@ -153,7 +117,6 @@ const App = () => {
                               children: [...currNode.children, node.id],
                             };
                           }
-                          console.log("already binded!");
                         }
                         return currNode;
                       })
@@ -162,7 +125,6 @@ const App = () => {
                   setSelectedNode(null);
                 } else {
                   setSelectedNode(node);
-                  console.log("selected node: ", node);
                 }
               }}
             />
