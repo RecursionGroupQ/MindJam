@@ -1,4 +1,5 @@
 import React, { createContext, useState, useMemo } from "react";
+import Konva from "konva";
 
 export const fills = ["#6B7280", "#EF4444", "#F59E0B", "#10B981", "#3B82F6", "#6366F1", "#8B5CF6", "#EC4899"];
 
@@ -40,6 +41,8 @@ type IRoomContext = {
   setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
   selectedNode: Node | null;
   setSelectedNode: React.Dispatch<React.SetStateAction<Node | null>>;
+  shapeRefs: React.RefObject<Konva.Group>[];
+  setShapeRefs: React.Dispatch<React.SetStateAction<React.RefObject<Konva.Group>[]>>;
 };
 
 export const RoomContext: React.Context<IRoomContext> = createContext({} as IRoomContext);
@@ -47,6 +50,7 @@ export const RoomContext: React.Context<IRoomContext> = createContext({} as IRoo
 export const RoomContextProvider: React.FC<Props> = ({ children }) => {
   const [nodes, setNodes] = useState<Node[]>(generateNodes());
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [shapeRefs, setShapeRefs] = useState<React.RefObject<Konva.Group>[]>([]);
 
   const value = useMemo(
     () => ({
@@ -54,8 +58,10 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
       setNodes,
       selectedNode,
       setSelectedNode,
+      shapeRefs,
+      setShapeRefs,
     }),
-    [nodes, selectedNode]
+    [nodes, selectedNode, shapeRefs]
   );
 
   return <RoomContext.Provider value={value}>{children}</RoomContext.Provider>;
