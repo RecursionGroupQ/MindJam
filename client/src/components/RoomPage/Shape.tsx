@@ -1,8 +1,10 @@
 import React, { useContext, useRef } from "react";
 import Konva from "konva";
-import { Group, Circle } from "react-konva";
+import { Group } from "react-konva";
 import { RoomContext, Node } from "../../context/RoomContext";
 import ShapeText from "./ShapeText";
+import RectShape from "./ShapeComponent/RectShape";
+import CircleShape from "./ShapeComponent/CircleShape";
 
 type Props = {
   node: Node;
@@ -83,7 +85,9 @@ const Shape: React.FC<Props> = ({ node, ind }) => {
       onDragEnd={handleDragEnd}
       onClick={handleClick}
     >
-      <Circle fill={node.fill} radius={50} shadowBlur={5} />
+      {node.shapeType === "rect" && <RectShape node={node} />}
+      {node.shapeType === "circle" && <CircleShape node={node} />}
+
       <ShapeText node={node} />
     </Group>
   );

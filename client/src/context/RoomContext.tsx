@@ -13,6 +13,7 @@ const generateNodes = () => {
       id: i,
       children: [],
       text: `node-${i}`,
+      shapeType: "rect",
       x: Math.random() * CANVAS_WIDTH,
       y: Math.random() * CANVAS_HEIGHT,
       fill: fills[Math.floor(Math.random() * fills.length)],
@@ -26,6 +27,7 @@ export type Node = {
   id: number;
   children: number[];
   text: string;
+  shapeType: string;
   x: number;
   y: number;
   isDragging: boolean;
@@ -43,6 +45,8 @@ type IRoomContext = {
   setSelectedNode: React.Dispatch<React.SetStateAction<Node | null>>;
   shapeRefs: React.RefObject<Konva.Group>[];
   setShapeRefs: React.Dispatch<React.SetStateAction<React.RefObject<Konva.Group>[]>>;
+  shapeTypeRef: string;
+  setShapeTypeRef: React.Dispatch<React.SetStateAction<string>>;
 };
 
 export const RoomContext: React.Context<IRoomContext> = createContext({} as IRoomContext);
@@ -51,7 +55,7 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
   const [nodes, setNodes] = useState<Node[]>(generateNodes());
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [shapeRefs, setShapeRefs] = useState<React.RefObject<Konva.Group>[]>([]);
-
+  const [shapeTypeRef, setShapeTypeRef] = useState("rect");
   const value = useMemo(
     () => ({
       nodes,
@@ -60,8 +64,10 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
       setSelectedNode,
       shapeRefs,
       setShapeRefs,
+      shapeTypeRef,
+      setShapeTypeRef,
     }),
-    [nodes, selectedNode, shapeRefs]
+    [nodes, selectedNode, shapeRefs, shapeTypeRef]
   );
 
   return <RoomContext.Provider value={value}>{children}</RoomContext.Provider>;
