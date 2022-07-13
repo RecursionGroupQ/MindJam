@@ -1,8 +1,10 @@
 import React, { useContext, useEffect, useRef } from "react";
 import Konva from "konva";
-import { Ellipse, Group } from "react-konva";
+import { Group } from "react-konva";
 import { RoomContext, Node } from "../../context/RoomContext";
 import ShapeText from "./ShapeText";
+import RectShape from "./ShapeComponent/RectShape";
+import EllipseShape from "./ShapeComponent/EllipseShape";
 
 type Props = {
   node: Node;
@@ -151,7 +153,8 @@ const Shape: React.FC<Props> = ({ node }) => {
       onTransformEnd={handleTransformEnd}
       name="mindmap-node"
     >
-      <Ellipse fill={node.fill} radiusX={node.width} radiusY={node.height} shadowBlur={5} />
+      {node.shapeType === "rect" && <RectShape node={node} />}
+      {node.shapeType === "ellipse" && <EllipseShape node={node} />}
       <ShapeText node={node} />
     </Group>
   );

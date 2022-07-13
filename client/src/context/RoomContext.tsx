@@ -13,6 +13,7 @@ const generateNodes = () => {
       id: i.toString(),
       children: [],
       text: `node-${i}`,
+      shapeType: "rect" as ShapeType,
       x: Math.random() * CANVAS_WIDTH,
       y: Math.random() * CANVAS_HEIGHT,
       width: 100,
@@ -23,6 +24,8 @@ const generateNodes = () => {
   return nodes;
 };
 
+export type ShapeType = "rect" | "ellipse";
+
 type Props = {
   children: React.ReactNode;
 };
@@ -31,6 +34,7 @@ export type Node = {
   id: string;
   children: string[];
   text: string;
+  shapeType: ShapeType;
   x: number;
   y: number;
   width: number;
@@ -57,6 +61,8 @@ type IRoomContext = {
   setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
   selectedNode: Node | null;
   setSelectedNode: React.Dispatch<React.SetStateAction<Node | null>>;
+  shapeType: ShapeType;
+  setShapeType: React.Dispatch<React.SetStateAction<ShapeType>>;
   selectedShapes: Konva.Group[];
   setSelectedShapes: React.Dispatch<React.SetStateAction<Konva.Group[]>>;
   stageConfig: StageConfig;
@@ -70,6 +76,7 @@ export const RoomContext: React.Context<IRoomContext> = createContext({} as IRoo
 export const RoomContextProvider: React.FC<Props> = ({ children }) => {
   const [nodes, setNodes] = useState<Node[]>(generateNodes());
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [shapeType, setShapeType] = useState<ShapeType>("rect");
   const [selectedShapes, setSelectedShapes] = useState<Konva.Group[]>([]);
   const [stageConfig, setStageConfig] = useState<StageConfig>({
     stageScale: 0.8,
@@ -90,6 +97,8 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
       setNodes,
       selectedNode,
       setSelectedNode,
+      shapeType,
+      setShapeType,
       selectedShapes,
       setSelectedShapes,
       stageConfig,
@@ -97,7 +106,7 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
       stageStyle,
       setStageStyle,
     }),
-    [nodes, selectedNode, selectedShapes, stageConfig, stageStyle]
+    [nodes, selectedNode, selectedShapes, stageConfig, stageStyle, shapeType]
   );
 
   return <RoomContext.Provider value={value}>{children}</RoomContext.Provider>;
