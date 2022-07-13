@@ -2,12 +2,12 @@ import React, { useContext, useRef, useEffect } from "react";
 import { Stage, Layer, Transformer } from "react-konva";
 import Konva from "konva";
 import { Dropdown } from "flowbite-react";
-import { Node, RoomContext, fills, CANVAS_WIDTH, CANVAS_HEIGHT } from "../context/RoomContext";
+import { Node, RoomContext, fills, CANVAS_WIDTH, CANVAS_HEIGHT, ShapeType } from "../context/RoomContext";
 import Edge from "../components/RoomPage/Edge";
 import Shape from "../components/RoomPage/Shape";
 
 const RoomPage = () => {
-  const { nodes, setNodes, selectedNode, shapeRefs, shapeTypeRef, setShapeTypeRef } = useContext(RoomContext);
+  const { nodes, setNodes, selectedNode, shapeRefs, shapeType, setShapeType } = useContext(RoomContext);
   const transformerRef = useRef<Konva.Transformer>(null);
 
   useEffect(() => {
@@ -27,7 +27,7 @@ const RoomPage = () => {
           id: nodes.length,
           children: [],
           text: `node-${nodes.length}`,
-          shapeType: shapeTypeRef,
+          shapeType,
           x: pointerPosition.x,
           y: pointerPosition.y,
           fill: fills[Math.floor(Math.random() * fills.length)],
@@ -38,14 +38,12 @@ const RoomPage = () => {
     }
   };
 
-  const handleChangeOfShape = (type: string) => {
+  const handleChangeOfShape = (type: ShapeType) => {
     // ノードが選択されている場合（選択されているノードのみ変更）
     if (selectedNode) {
-      // 選択されているノードIDを取得
-      const indexOfTheSelectedNode = selectedNode.id;
       setNodes(
-        nodes.map((currNode, index) => {
-          if (index === indexOfTheSelectedNode) {
+        nodes.map((currNode) => {
+          if (currNode.id === selectedNode.id) {
             return {
               ...currNode,
               shapeType: type,
@@ -54,22 +52,17 @@ const RoomPage = () => {
           return currNode;
         })
       );
-      setShapeTypeRef(type);
+      setShapeType(type);
     }
     // ノードが選択されていない場合(全体を変更)
     else {
       setNodes(
-        nodes.map((currNode, index) => {
-          if (index === currNode.id) {
-            return {
-              ...currNode,
-              shapeType: type,
-            };
-          }
-          return currNode;
-        })
+        nodes.map((currNode) => ({
+          ...currNode,
+          shapeType: type,
+        }))
       );
-      setShapeTypeRef(type);
+      setShapeType(type);
     }
   };
 

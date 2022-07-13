@@ -13,7 +13,7 @@ const generateNodes = () => {
       id: i,
       children: [],
       text: `node-${i}`,
-      shapeType: "rect",
+      shapeType: "rect" as ShapeType,
       x: Math.random() * CANVAS_WIDTH,
       y: Math.random() * CANVAS_HEIGHT,
       fill: fills[Math.floor(Math.random() * fills.length)],
@@ -23,11 +23,13 @@ const generateNodes = () => {
   return nodes;
 };
 
+export type ShapeType = "rect" | "circle";
+
 export type Node = {
   id: number;
   children: number[];
   text: string;
-  shapeType: string;
+  shapeType: ShapeType;
   x: number;
   y: number;
   isDragging: boolean;
@@ -45,8 +47,8 @@ type IRoomContext = {
   setSelectedNode: React.Dispatch<React.SetStateAction<Node | null>>;
   shapeRefs: React.RefObject<Konva.Group>[];
   setShapeRefs: React.Dispatch<React.SetStateAction<React.RefObject<Konva.Group>[]>>;
-  shapeTypeRef: string;
-  setShapeTypeRef: React.Dispatch<React.SetStateAction<string>>;
+  shapeType: ShapeType;
+  setShapeType: React.Dispatch<React.SetStateAction<ShapeType>>;
 };
 
 export const RoomContext: React.Context<IRoomContext> = createContext({} as IRoomContext);
@@ -55,7 +57,7 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
   const [nodes, setNodes] = useState<Node[]>(generateNodes());
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [shapeRefs, setShapeRefs] = useState<React.RefObject<Konva.Group>[]>([]);
-  const [shapeTypeRef, setShapeTypeRef] = useState("rect");
+  const [shapeType, setShapeType] = useState<ShapeType>("rect");
   const value = useMemo(
     () => ({
       nodes,
@@ -64,10 +66,10 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
       setSelectedNode,
       shapeRefs,
       setShapeRefs,
-      shapeTypeRef,
-      setShapeTypeRef,
+      shapeType,
+      setShapeType,
     }),
-    [nodes, selectedNode, shapeRefs, shapeTypeRef]
+    [nodes, selectedNode, shapeRefs, shapeType]
   );
 
   return <RoomContext.Provider value={value}>{children}</RoomContext.Provider>;
