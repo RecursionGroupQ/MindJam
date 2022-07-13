@@ -1,8 +1,8 @@
-import React, { useContext, useRef } from "react";
+import React, { useContext, useRef, useState } from "react";
 import Konva from "konva";
 import { Group, Circle } from "react-konva";
 import { RoomContext, Node } from "../../context/RoomContext";
-import ShapeText from "./ShapeText";
+import EditableText from "./EditableText";
 
 type Props = {
   node: Node;
@@ -12,6 +12,8 @@ type Props = {
 const Shape: React.FC<Props> = ({ node, ind }) => {
   const { nodes, setNodes, selectedNode, setSelectedNode, setShapeRefs } = useContext(RoomContext);
   const shapeRef = useRef<Konva.Group>(null);
+  const [text, setText] = useState<string>(node.text);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
 
   const handleDragMove = (e: Konva.KonvaEventObject<DragEvent>) => {
     setNodes(
@@ -66,11 +68,20 @@ const Shape: React.FC<Props> = ({ node, ind }) => {
         );
       }
       setSelectedNode(null);
-      // setShapeRefs((prevState) => prevState.filter((ref) => ref.current))
     } else {
       setSelectedNode(node);
       setShapeRefs((prevState) => [...prevState, shapeRef]);
     }
+  };
+
+  const onTextChange = (value: string) => {
+    // textの更新
+    setText(value);
+  };
+
+  const onToggleEdit = () => {
+    // 編集モードの切替
+    setIsEditing(!isEditing);
   };
 
   return (
@@ -83,8 +94,18 @@ const Shape: React.FC<Props> = ({ node, ind }) => {
       onDragEnd={handleDragEnd}
       onClick={handleClick}
     >
-      <Circle fill={node.fill} radius={50} shadowBlur={5} />
-      <ShapeText node={node} />
+      <Circle fill={node.fill} radius={100} shadowBlur={5} />
+      <EditableText
+        node={node}
+        x={-50}
+        y={-20}
+        text={text}
+        isEditing={isEditing}
+        width={100}
+        height={100}
+        onTextChange={onTextChange}
+        onToggleEdit={onToggleEdit}
+      />
     </Group>
   );
 };
