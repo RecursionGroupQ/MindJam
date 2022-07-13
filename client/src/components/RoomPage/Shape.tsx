@@ -1,8 +1,8 @@
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import Konva from "konva";
 import { Group } from "react-konva";
 import { RoomContext, Node } from "../../context/RoomContext";
-import ShapeText from "./ShapeText";
+import EditableText from "./EditableText";
 import RectShape from "./ShapeComponent/RectShape";
 import EllipseShape from "./ShapeComponent/EllipseShape";
 
@@ -13,6 +13,8 @@ type Props = {
 const Shape: React.FC<Props> = ({ node }) => {
   const { nodes, setNodes, selectedNode, setSelectedNode, selectedShapes, setSelectedShapes } = useContext(RoomContext);
   const shapeRef = useRef<Konva.Group>(null);
+  const [text, setText] = useState<string>(node.text);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
 
   useEffect(() => {
     // add node.id as attribute to ref of shape
@@ -140,6 +142,16 @@ const Shape: React.FC<Props> = ({ node }) => {
     }
   };
 
+  const onTextChange = (value: string) => {
+    // textの更新
+    setText(value);
+  };
+
+  const onToggleEdit = () => {
+    // 編集モードの切替
+    setIsEditing(!isEditing);
+  };
+
   return (
     <Group
       ref={shapeRef}
@@ -155,7 +167,15 @@ const Shape: React.FC<Props> = ({ node }) => {
     >
       {node.shapeType === "rect" && <RectShape node={node} />}
       {node.shapeType === "ellipse" && <EllipseShape node={node} />}
-      <ShapeText node={node} />
+      <EditableText
+        node={node}
+        x={0}
+        y={0}
+        text={text}
+        isEditing={isEditing}
+        onTextChange={onTextChange}
+        onToggleEdit={onToggleEdit}
+      />
     </Group>
   );
 };
