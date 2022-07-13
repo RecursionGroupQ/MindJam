@@ -7,7 +7,7 @@ type Props = {
 };
 
 const EllipseShape: React.FC<Props> = ({ node }) => (
-  <Ellipse stroke={node.fill} radiusX={node.width / 2} radiusY={node.height / 2} />
+  <Ellipse stroke={node.fill} fill="#fff" radiusX={node.width / 2} radiusY={node.height / 2} />
 );
 
 export default EllipseShape;
