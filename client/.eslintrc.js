@@ -28,6 +28,7 @@ module.exports = {
   ignorePatterns: [".eslintrc.js", "postcss.config.js", "tailwind.config.js"],
   rules: {
     "no-unused-vars": "off",
+    "no-underscore-dangle": "off",
     "@typescript-eslint/no-unused-vars": ["error"],
     "no-use-before-define": "off",
     "@typescript-eslint/no-use-before-define": ["error"],

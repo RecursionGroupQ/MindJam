@@ -14,13 +14,11 @@ const Edge: React.FC<Props> = ({ node }) => {
     const dy = to.y - from.y;
     const angle = Math.atan2(-dy, dx);
 
-    const radius = 60;
-
     return [
-      from.x + -radius * Math.cos(angle + Math.PI),
-      from.y + radius * Math.sin(angle + Math.PI),
-      to.x + -radius * Math.cos(angle),
-      to.y + radius * Math.sin(angle),
+      from.x - Math.cos(angle + Math.PI),
+      from.y + Math.sin(angle + Math.PI),
+      to.x - Math.cos(angle),
+      to.y + Math.sin(angle),
     ];
   };
 
@@ -29,7 +27,13 @@ const Edge: React.FC<Props> = ({ node }) => {
       {node.children.map((childId) => {
         const childNode = nodes.filter((_node) => _node.id === childId)[0];
         return (
-          <Line key={`${node.id}_${childId}`} points={getEdgePoints(node, childNode)} stroke="#9CA3AF" dash={[8, 4]} />
+          <Line
+            key={`${node.id}_${childId}`}
+            points={getEdgePoints(node, childNode)}
+            stroke="#9CA3AF"
+            strokeWidth={4}
+            dash={[8, 4]}
+          />
         );
       })}
     </>
