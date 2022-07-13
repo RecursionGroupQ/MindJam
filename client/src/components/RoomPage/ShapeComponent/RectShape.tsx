@@ -7,7 +7,7 @@ type Props = {
 };
 
 const RectShape: React.FC<Props> = ({ node }) => (
-  <Rect width={200} height={80} stroke={node.fill} strokeWidth={4} cornerRadius={10} />
+  <Rect width={node.width} height={node.height} stroke={node.fill} strokeWidth={4} cornerRadius={10} />
 );
 
 export default RectShape;
