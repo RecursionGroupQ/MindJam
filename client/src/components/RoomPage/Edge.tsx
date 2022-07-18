@@ -65,7 +65,7 @@ const Edge: React.FC<Props> = ({ node }) => {
               context.lineTo(points[1].x, points[1].y);
               context.fillStrokeShape(shape);
             }}
-            stroke="#ffffff"
+            stroke="#000"
             strokeWidth={4}
             dash={[8, 4]}
           />
