@@ -5,6 +5,7 @@ import { RoomContext, Node } from "../../context/RoomContext";
 import EditableText from "./EditableText";
 import RectShape from "./ShapeComponent/RectShape";
 import EllipseShape from "./ShapeComponent/EllipseShape";
+import StarShape from "./ShapeComponent/StarShape";
 
 type Props = {
   node: Node;
@@ -151,7 +152,6 @@ const Shape: React.FC<Props> = ({ node }) => {
     // 編集モードの切替
     setIsEditing(!isEditing);
   };
-
   return (
     <Group
       ref={shapeRef}
@@ -167,6 +167,9 @@ const Shape: React.FC<Props> = ({ node }) => {
     >
       {node.shapeType === "rect" && <RectShape node={node} />}
       {node.shapeType === "ellipse" && <EllipseShape node={node} />}
+      {/* <RegularPolygon sides={10} radius={70} fill="red" stroke="black" /> */}
+      {node.shapeType === "star" && <StarShape node={node} />}
+
       <EditableText
         node={node}
         x={0}

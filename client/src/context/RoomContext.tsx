@@ -6,7 +6,7 @@ export const fills = ["#6B7280", "#EF4444", "#F59E0B", "#10B981", "#3B82F6", "#6
 export const CANVAS_WIDTH = window.innerWidth;
 export const CANVAS_HEIGHT = window.innerHeight;
 
-export type ShapeType = "rect" | "ellipse";
+export type ShapeType = "rect" | "ellipse" | "star";
 
 const generateNodes = () => {
   const nodes = [];
@@ -15,7 +15,7 @@ const generateNodes = () => {
       id: i.toString(),
       children: [],
       text: `node-${i}`,
-      shapeType: "rect" as ShapeType,
+      shapeType: "star" as ShapeType,
       x: Math.random() * CANVAS_WIDTH,
       y: Math.random() * CANVAS_HEIGHT,
       width: 380,

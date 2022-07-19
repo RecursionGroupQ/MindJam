@@ -113,16 +113,34 @@ const NodeStylePanel = () => {
                 {content}
               </TabPanel>
             ))}
-
-            <div className="ml-5 float-left">
-              <button type="button" onClick={() => handleChangeOfShape("rect")}>
-                <RectSVG />
-              </button>
-            </div>
-            <div>
-              <button type="button" onClick={() => handleChangeOfShape("ellipse")}>
-                <EllipseSVG fill="none" stroke="#000000" width={44} height={44} />
-              </button>
+            <div className="flex">
+              <div className="ml-5">
+                <button type="button" className="hover:bg-grey-300" onClick={() => handleChangeOfShape("rect")}>
+                  <RectSVG />
+                </button>
+              </div>
+              <div>
+                <button type="button" className="hover:bg-grey-300" onClick={() => handleChangeOfShape("ellipse")}>
+                  <EllipseSVG fill="none" stroke="#000000" width={44} height={44} />
+                </button>
+              </div>
+              <div>
+                <button type="button" className="hover:bg-grey-300" onClick={() => handleChangeOfShape("star")}>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="50"
+                    height="45"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="black"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polygon points="12 2 16 7 22 9.27 18.50 14 18.18 21.02 12 19 5.82 21.02 5 14.14 2 9.27 8 7 12 2" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </TabsBody>
         </Tabs>
