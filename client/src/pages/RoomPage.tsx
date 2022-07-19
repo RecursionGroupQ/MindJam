@@ -1,16 +1,16 @@
 import React, { useContext, useRef, useEffect, useState } from "react";
-import { Stage, Layer, Transformer, Rect } from "react-konva";
+import { Stage, Layer, Transformer } from "react-konva";
 import Konva from "konva";
-import { Dropdown } from "flowbite-react";
-import { Node, RoomContext, fills, CANVAS_WIDTH, CANVAS_HEIGHT, ShapeType } from "../context/RoomContext";
+
+import { Node, RoomContext, CANVAS_WIDTH, CANVAS_HEIGHT } from "../context/RoomContext";
 import Edge from "../components/RoomPage/Edge";
 import Shape from "../components/RoomPage/Shape";
+import ToolBox from "../components/RoomPage/ToolBox/ToolBox";
 
 const RoomPage = () => {
   const {
     nodes,
     setNodes,
-    selectedNode,
     selectedShapes,
     setSelectedShapes,
     setSelectedNode,
@@ -19,7 +19,9 @@ const RoomPage = () => {
     stageStyle,
     setStageStyle,
     shapeType,
-    setShapeType,
+    fillStyle,
+    strokeStyle,
+    setDisplayColorPicker,
   } = useContext(RoomContext);
 
   const [canDragStage, setCanDragStage] = useState(true);
@@ -60,40 +62,13 @@ const RoomPage = () => {
           shapeType,
           x: pointerPosition.x,
           y: pointerPosition.y,
-          width: 150,
-          height: 150,
-          fill: fills[Math.floor(Math.random() * fills.length)],
+          width: 380,
+          height: 90,
+          fillStyle,
+          strokeStyle,
         };
         setNodes((prevState) => [...prevState, newNode]);
       }
-    }
-  };
-
-  const handleChangeOfShape = (type: ShapeType) => {
-    // ノードが選択されている場合（選択されているノードのみ変更）
-    if (selectedNode) {
-      setNodes(
-        nodes.map((currNode) => {
-          if (currNode.id === selectedNode.id) {
-            return {
-              ...currNode,
-              shapeType: type,
-            };
-          }
-          return currNode;
-        })
-      );
-      setShapeType(type);
-    }
-    // ノードが選択されていない場合(全体を変更)
-    else {
-      setNodes(
-        nodes.map((currNode) => ({
-          ...currNode,
-          shapeType: type,
-        }))
-      );
-      setShapeType(type);
     }
   };
 
@@ -151,6 +126,7 @@ const RoomPage = () => {
     if (e.target === stageRef.current) {
       setSelectedNode(null);
       setSelectedShapes([]);
+      setDisplayColorPicker(false);
     }
   };
 
@@ -213,12 +189,7 @@ const RoomPage = () => {
 
   return (
     <>
-      <div className="flex justify-center">
-        <Dropdown label="changeShape">
-          <Dropdown.Item onClick={() => handleChangeOfShape("rect")}>Rect</Dropdown.Item>
-          <Dropdown.Item onClick={() => handleChangeOfShape("ellipse")}>Circle</Dropdown.Item>
-        </Dropdown>
-      </div>
+      <ToolBox />
       <RoomContext.Consumer>
         {(value) => (
           <Stage
@@ -250,8 +221,22 @@ const RoomPage = () => {
                 {nodes.map((node) => (
                   <Shape key={node.id} node={node} />
                 ))}
-                {selectedShapes && <Transformer ref={transformerRef} rotateEnabled={false} />}
-                <Rect ref={selectionRectRef} fill="rgba(99,102,241,0.2)" visible={false} />
+                {selectedShapes && (
+                  <Transformer
+                    ref={transformerRef}
+                    rotateEnabled={false}
+                    anchorSize={15}
+                    anchorStrokeWidth={3}
+                    anchorCornerRadius={100}
+                    flipEnabled={false}
+                    boundBoxFunc={(oldBox, newBox) => {
+                      if (newBox.width > 800) {
+                        return oldBox;
+                      }
+                      return newBox;
+                    }}
+                  />
+                )}
               </Layer>
             </RoomContext.Provider>
           </Stage>
