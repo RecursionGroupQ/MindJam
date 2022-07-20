@@ -20,34 +20,32 @@ const EditableText: React.FC<Props> = ({ node, x, y, text, isEditing, onTextChan
 
   const handleOnBlurSaveText = () => {
     // クリックアウトでテキストをノードに保存し、編集モードを終了する。
-    setNodes(
-      nodes.map((currNode) => {
-        if (node.id === currNode.id) {
-          return {
-            ...currNode,
-            text,
-          };
-        }
-        return currNode;
-      })
-    );
+    setNodes((prevState) => {
+      const currNode = nodes.get(node.id);
+      if (!currNode) return prevState;
+      return new Map(
+        prevState.set(node.id, {
+          ...currNode,
+          text,
+        })
+      );
+    });
     onToggleEdit();
   };
 
   const handleOnKeyDownSaveText = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // キーダウン（Esc）でテキストをノードに保存し、編集モードを終了する。
     if (e.keyCode === ESCAPE_KEY) {
-      setNodes(
-        nodes.map((currNode) => {
-          if (node.id === currNode.id) {
-            return {
-              ...currNode,
-              text,
-            };
-          }
-          return currNode;
-        })
-      );
+      setNodes((prevState) => {
+        const currNode = nodes.get(node.id);
+        if (!currNode) return prevState;
+        return new Map(
+          prevState.set(node.id, {
+            ...currNode,
+            text,
+          })
+        );
+      });
       onToggleEdit();
     }
   };
@@ -72,7 +70,18 @@ const EditableText: React.FC<Props> = ({ node, x, y, text, isEditing, onTextChan
     );
   }
   return (
-    <Text x={x} y={y} width={node.width} height={node.height} fontSize={25} text={text} onDblClick={onToggleEdit} />
+    <Text
+      x={x}
+      y={y}
+      width={node.width}
+      height={node.height}
+      fontSize={25}
+      text={text}
+      align="center"
+      verticalAlign="middle"
+      onDblClick={onToggleEdit}
+      fontFamily="Poppins"
+    />
   );
 };
 

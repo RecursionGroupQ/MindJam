@@ -1,7 +1,7 @@
 import React, { useContext, useRef, useEffect, useState } from "react";
-import { Stage, Layer, Transformer } from "react-konva";
+import { Stage, Layer, Transformer, Rect } from "react-konva";
 import Konva from "konva";
-
+import { nanoid } from "nanoid";
 import { Node, RoomContext, CANVAS_WIDTH, CANVAS_HEIGHT } from "../context/RoomContext";
 import Edge from "../components/RoomPage/Edge";
 import Shape from "../components/RoomPage/Shape";
@@ -55,10 +55,11 @@ const RoomPage = () => {
     if (stage) {
       pointerPosition = stage.getRelativePointerPosition();
       if (pointerPosition) {
+        const id = nanoid();
         const newNode: Node = {
-          id: nodes.length.toString(),
+          id,
           children: [],
-          text: `node-${nodes.length}`,
+          text: `node-${id}`,
           shapeType,
           x: pointerPosition.x,
           y: pointerPosition.y,
@@ -67,7 +68,7 @@ const RoomPage = () => {
           fillStyle,
           strokeStyle,
         };
-        setNodes((prevState) => [...prevState, newNode]);
+        setNodes((prevState) => new Map(prevState.set(id, newNode)));
       }
     }
   };
@@ -215,11 +216,11 @@ const RoomPage = () => {
           >
             <RoomContext.Provider value={value}>
               <Layer>
-                {nodes.map((node) => (
-                  <Edge key={node.id} node={node} />
+                {Array.from(nodes.keys()).map((key) => (
+                  <Edge key={key} node={nodes.get(key) as Node} />
                 ))}
-                {nodes.map((node) => (
-                  <Shape key={node.id} node={node} />
+                {Array.from(nodes.keys()).map((key) => (
+                  <Shape key={key} node={nodes.get(key) as Node} />
                 ))}
                 {selectedShapes && (
                   <Transformer
@@ -237,6 +238,7 @@ const RoomPage = () => {
                     }}
                   />
                 )}
+                <Rect ref={selectionRectRef} fill="rgba(99,102,241,0.2)" visible={false} />
               </Layer>
             </RoomContext.Provider>
           </Stage>

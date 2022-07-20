@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React from "react";
 
 import {
   Popover,
@@ -10,12 +10,14 @@ import {
   TabsBody,
   TabPanel,
 } from "@material-tailwind/react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPaintBrush } from "@fortawesome/free-solid-svg-icons";
 
-import BrushSVG from "../SVGComponent/BrushSVG";
 import NodeColor from "./NodeColor";
 import RectSVG from "../SVGComponent/RectSVG";
 import EllipseSVG from "../SVGComponent/EllipseSVG";
-import { RoomContext, ShapeType } from "../../../../context/RoomContext";
+import { ShapeType } from "../../../../context/RoomContext";
+import useChangeNodeStyle from "../../../../hooks/useChangeNodeStyle";
 
 type PanelData = {
   label: "Fill" | "Stroke" | "Line";
@@ -24,48 +26,10 @@ type PanelData = {
 }[];
 
 const NodeStylePanel = () => {
-  const { nodes, setNodes, selectedNode, setShapeType, selectedShapes } = useContext(RoomContext);
+  const { changeNodeShapes } = useChangeNodeStyle();
 
-  const handleChangeOfShape = (type: ShapeType) => {
-    // ノードが一つだけ選択されている場合
-    if (selectedNode && selectedShapes.length === 1) {
-      setNodes(
-        nodes.map((currNode) => {
-          if (currNode.id === selectedNode.id) {
-            return {
-              ...currNode,
-              shapeType: type,
-            };
-          }
-          return currNode;
-        })
-      );
-      setShapeType(type);
-    }
-    // ノードが複数選択されている場合
-    else if (selectedShapes.length >= 2) {
-      // 選択されているノードのindexを入れる
-      const arr: string[] = [];
-      Object.keys(selectedShapes).forEach((key) => {
-        arr.unshift(String(selectedShapes[Number(key)].index));
-      });
-      // arrの中にcurrNode.idがあれば、shapeTypeを変える
-      setNodes(
-        nodes.map((currNode) => {
-          const isExist = arr.indexOf(currNode.id);
-          if (isExist !== -1) {
-            return {
-              ...currNode,
-              shapeType: type,
-            };
-          }
-          return currNode;
-        })
-      );
-      setShapeType(type);
-    }
-    // 何も選択されていない場合、ダブルクリックで次に描画するノードの形を変更する
-    setShapeType(type);
+  const handleChangeOfShape = (shapeType: ShapeType) => {
+    changeNodeShapes(shapeType);
   };
 
   const panelData: PanelData = [
@@ -90,7 +54,7 @@ const NodeStylePanel = () => {
     <Popover placement="left-start">
       <PopoverHandler>
         <button type="button">
-          <BrushSVG />
+          <FontAwesomeIcon icon={faPaintBrush} fontSize={30} />
         </button>
       </PopoverHandler>
       <PopoverContent>

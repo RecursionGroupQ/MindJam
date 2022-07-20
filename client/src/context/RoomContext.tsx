@@ -1,5 +1,6 @@
-import React, { createContext, useState, useMemo } from "react";
+import React, { createContext, useState, useMemo, useEffect } from "react";
 import Konva from "konva";
+import { nanoid } from "nanoid";
 
 export const fills = ["#6B7280", "#EF4444", "#F59E0B", "#10B981", "#3B82F6", "#6366F1", "#8B5CF6", "#EC4899"];
 
@@ -9,13 +10,14 @@ export const CANVAS_HEIGHT = window.innerHeight;
 export type ShapeType = "rect" | "ellipse" | "star";
 
 const generateNodes = () => {
-  const nodes = [];
+  const nodes = new Map<string, Node>();
   for (let i = 0; i < 4; i += 1) {
-    nodes.push({
-      id: i.toString(),
+    const id = nanoid();
+    nodes.set(id, {
+      id,
       children: [],
       text: `node-${i}`,
-      shapeType: "star" as ShapeType,
+      shapeType: "rect" as ShapeType,
       x: Math.random() * CANVAS_WIDTH,
       y: Math.random() * CANVAS_HEIGHT,
       width: 380,
@@ -59,8 +61,8 @@ type StageStyle = {
 };
 
 type IRoomContext = {
-  nodes: Node[];
-  setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
+  nodes: Map<string, Node>;
+  setNodes: React.Dispatch<React.SetStateAction<Map<string, Node>>>;
   selectedNode: Node | null;
   setSelectedNode: React.Dispatch<React.SetStateAction<Node | null>>;
   shapeType: ShapeType;
@@ -82,7 +84,8 @@ type IRoomContext = {
 export const RoomContext: React.Context<IRoomContext> = createContext({} as IRoomContext);
 
 export const RoomContextProvider: React.FC<Props> = ({ children }) => {
-  const [nodes, setNodes] = useState<Node[]>(generateNodes());
+  // const [nodes, setNodes] = useState<Node[]>(generateNodes());
+  const [nodes, setNodes] = useState<Map<string, Node>>(generateNodes());
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [shapeType, setShapeType] = useState<ShapeType>("rect");
   const [fillStyle, setFillStyle] = useState<string>("#ffffff");
@@ -101,6 +104,16 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
     backgroundPosition: "0px 0px",
   });
   const [displayColorPicker, setDisplayColorPicker] = useState(false);
+
+  useEffect(() => {
+    if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      setStageStyle((prevState) => ({
+        ...prevState,
+        backgroundColor: "#6b7280",
+        backgroundImage: "radial-gradient(#cbd5e1 1.1px, #6b7280 1.1px)",
+      }));
+    }
+  }, []);
 
   const value = useMemo(
     () => ({
