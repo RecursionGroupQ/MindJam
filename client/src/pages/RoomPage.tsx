@@ -2,6 +2,7 @@ import React, { useContext, useRef, useEffect, useState } from "react";
 import { Stage, Layer, Transformer, Rect } from "react-konva";
 import Konva from "konva";
 import { Dropdown } from "flowbite-react";
+import { nanoid } from "nanoid";
 import { Node, RoomContext, fills, CANVAS_WIDTH, CANVAS_HEIGHT, ShapeType } from "../context/RoomContext";
 import Edge from "../components/RoomPage/Edge";
 import Shape from "../components/RoomPage/Shape";
@@ -53,18 +54,19 @@ const RoomPage = () => {
     if (stage) {
       pointerPosition = stage.getRelativePointerPosition();
       if (pointerPosition) {
+        const id = nanoid();
         const newNode: Node = {
-          id: nodes.length.toString(),
+          id,
           children: [],
-          text: `node-${nodes.length}`,
+          text: `node-${id}`,
           shapeType,
           x: pointerPosition.x,
           y: pointerPosition.y,
-          width: 150,
-          height: 150,
+          width: 200,
+          height: 200,
           fill: fills[Math.floor(Math.random() * fills.length)],
         };
-        setNodes((prevState) => [...prevState, newNode]);
+        setNodes((prevState) => new Map(prevState.set(id, newNode)));
       }
     }
   };
@@ -73,26 +75,29 @@ const RoomPage = () => {
     // ノードが選択されている場合（選択されているノードのみ変更）
     if (selectedNode) {
       setNodes(
-        nodes.map((currNode) => {
-          if (currNode.id === selectedNode.id) {
-            return {
-              ...currNode,
+        (prevState) =>
+          new Map(
+            prevState.set(selectedNode.id, {
+              ...selectedNode,
               shapeType: type,
-            };
-          }
-          return currNode;
-        })
+            })
+          )
       );
       setShapeType(type);
     }
     // ノードが選択されていない場合(全体を変更)
     else {
-      setNodes(
-        nodes.map((currNode) => ({
-          ...currNode,
-          shapeType: type,
-        }))
-      );
+      setNodes((prevState) => {
+        const updatedNodes = new Map<string, Node>();
+        Array.from(prevState.keys()).forEach((key) => {
+          const currNode = nodes.get(key) as Node;
+          updatedNodes.set(key, {
+            ...currNode,
+            shapeType: type,
+          });
+        });
+        return updatedNodes;
+      });
       setShapeType(type);
     }
   };
@@ -244,13 +249,13 @@ const RoomPage = () => {
           >
             <RoomContext.Provider value={value}>
               <Layer>
-                {nodes.map((node) => (
-                  <Edge key={node.id} node={node} />
+                {Array.from(nodes.keys()).map((key) => (
+                  <Edge key={key} node={nodes.get(key) as Node} />
                 ))}
-                {nodes.map((node) => (
-                  <Shape key={node.id} node={node} />
+                {Array.from(nodes.keys()).map((key) => (
+                  <Shape key={key} node={nodes.get(key) as Node} />
                 ))}
-                {selectedShapes && <Transformer ref={transformerRef} rotateEnabled={false} />}
+                {selectedShapes && <Transformer ref={transformerRef} rotateEnabled={false} keepRatio={false} />}
                 <Rect ref={selectionRectRef} fill="rgba(99,102,241,0.2)" visible={false} />
               </Layer>
             </RoomContext.Provider>
