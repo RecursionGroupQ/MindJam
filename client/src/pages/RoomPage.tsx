@@ -44,6 +44,17 @@ const RoomPage = () => {
     window.addEventListener("keyup", () => {
       setCanDragStage(true);
     });
+
+    return () => {
+      window.removeEventListener("keydown", (e: KeyboardEvent) => {
+        if (e.shiftKey) {
+          setCanDragStage(false);
+        }
+      });
+      window.removeEventListener("keyup", () => {
+        setCanDragStage(true);
+      });
+    };
   }, []);
 
   // ダブルクリックでノードを追加

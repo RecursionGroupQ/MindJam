@@ -1,3 +1,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.public-DraftStyleDefault-block {
+  margin: 0 !important;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+p {
+  word-wrap: break-word;
+}

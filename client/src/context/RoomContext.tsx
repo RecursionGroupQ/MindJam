@@ -12,7 +12,7 @@ const generateNodes = () => {
     nodes.push({
       id: i.toString(),
       children: [],
-      text: `node-${i}`,
+      text: `<p>node-${i}</p>`,
       shapeType: "rect" as ShapeType,
       x: Math.random() * CANVAS_WIDTH,
       y: Math.random() * CANVAS_HEIGHT,
