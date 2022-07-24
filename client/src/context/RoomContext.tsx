@@ -69,11 +69,14 @@ type IRoomContext = {
   setStageConfig: React.Dispatch<React.SetStateAction<StageConfig>>;
   stageStyle: StageStyle;
   setStageStyle: React.Dispatch<React.SetStateAction<StageStyle>>;
+  stageRef: React.RefObject<Konva.Stage> | null;
+  setStageRef: React.Dispatch<React.SetStateAction<React.RefObject<Konva.Stage> | null>>;
 };
 
 export const RoomContext: React.Context<IRoomContext> = createContext({} as IRoomContext);
 
 export const RoomContextProvider: React.FC<Props> = ({ children }) => {
+  const [stageRef, setStageRef] = useState<React.RefObject<Konva.Stage> | null>(null);
   const [nodes, setNodes] = useState<Node[]>(generateNodes());
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [shapeType, setShapeType] = useState<ShapeType>("rect");
@@ -93,6 +96,8 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
 
   const value = useMemo(
     () => ({
+      stageRef,
+      setStageRef,
       nodes,
       setNodes,
       selectedNode,
@@ -106,7 +111,7 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
       stageStyle,
       setStageStyle,
     }),
-    [nodes, selectedNode, selectedShapes, stageConfig, stageStyle, shapeType]
+    [nodes, selectedNode, selectedShapes, stageConfig, stageStyle, shapeType, stageRef]
   );
 
   return <RoomContext.Provider value={value}>{children}</RoomContext.Provider>;

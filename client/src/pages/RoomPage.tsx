@@ -20,6 +20,7 @@ const RoomPage = () => {
     setStageStyle,
     shapeType,
     setShapeType,
+    setStageRef,
   } = useContext(RoomContext);
 
   const [canDragStage, setCanDragStage] = useState(true);
@@ -27,6 +28,12 @@ const RoomPage = () => {
   const selectionRectRef = useRef<Konva.Rect>(null);
   const [selectionRectCoords, setSelectionRectCoords] = useState({ x1: 0, y1: 0 });
   const stageRef = useRef<Konva.Stage>(null);
+
+  useEffect(() => {
+    if (stageRef.current) {
+      setStageRef(stageRef);
+    }
+  }, [setStageRef]);
 
   useEffect(() => {
     if (selectedShapes) {
@@ -61,7 +68,7 @@ const RoomPage = () => {
   const handleDoubleClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
     const stage = e.target.getStage();
     let pointerPosition = null;
-    if (stage) {
+    if (e.target === stageRef.current && stage) {
       pointerPosition = stage.getRelativePointerPosition();
       if (pointerPosition) {
         const newNode: Node = {
