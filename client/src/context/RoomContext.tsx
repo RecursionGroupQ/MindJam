@@ -16,7 +16,7 @@ const generateNodes = () => {
     nodes.set(id, {
       id,
       children: [],
-      text: `node-${i}`,
+      text: `<p>node-${id}</p>`,
       shapeType: "rect" as ShapeType,
       x: Math.random() * CANVAS_WIDTH,
       y: Math.random() * CANVAS_HEIGHT,
@@ -77,6 +77,8 @@ type IRoomContext = {
   setStageConfig: React.Dispatch<React.SetStateAction<StageConfig>>;
   stageStyle: StageStyle;
   setStageStyle: React.Dispatch<React.SetStateAction<StageStyle>>;
+  stageRef: React.RefObject<Konva.Stage> | null;
+  setStageRef: React.Dispatch<React.SetStateAction<React.RefObject<Konva.Stage> | null>>;
   displayColorPicker: boolean;
   setDisplayColorPicker: React.Dispatch<React.SetStateAction<boolean>>;
 };
@@ -84,7 +86,7 @@ type IRoomContext = {
 export const RoomContext: React.Context<IRoomContext> = createContext({} as IRoomContext);
 
 export const RoomContextProvider: React.FC<Props> = ({ children }) => {
-  // const [nodes, setNodes] = useState<Node[]>(generateNodes());
+  const [stageRef, setStageRef] = useState<React.RefObject<Konva.Stage> | null>(null);
   const [nodes, setNodes] = useState<Map<string, Node>>(generateNodes());
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [shapeType, setShapeType] = useState<ShapeType>("rect");
@@ -117,6 +119,8 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
 
   const value = useMemo(
     () => ({
+      stageRef,
+      setStageRef,
       nodes,
       setNodes,
       selectedNode,
@@ -146,6 +150,7 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
       fillStyle,
       strokeStyle,
       displayColorPicker,
+      stageRef,
     ]
   );
 
