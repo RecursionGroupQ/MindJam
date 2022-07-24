@@ -14,7 +14,7 @@ type Props = {
 };
 
 const Text: React.FC<Props> = ({ node, isEditing, onToggleEdit }) => {
-  const { stageConfig, stageRef } = useContext(RoomContext);
+  const { stageConfig, stageRef, setNodes } = useContext(RoomContext);
   const [text, setText] = useState<string>(node.text);
   const textRef = useRef<HTMLDivElement | null>(null);
 
@@ -30,6 +30,20 @@ const Text: React.FC<Props> = ({ node, isEditing, onToggleEdit }) => {
       }
     }
   }, [stageRef, isEditing]);
+
+  const handleOnBlur = () => {
+    onToggleEdit();
+    setNodes((prevState) => {
+      const currNode = prevState.get(node.id);
+      if (!currNode) return prevState;
+      return new Map(
+        prevState.set(node.id, {
+          ...currNode,
+          text,
+        })
+      );
+    });
+  };
 
   const onEditorStateChange = (editorState: EditorState) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
@@ -77,7 +91,7 @@ const Text: React.FC<Props> = ({ node, isEditing, onToggleEdit }) => {
             localization={{
               locale: "ja",
             }}
-            onBlur={onToggleEdit}
+            onBlur={handleOnBlur}
             onEditorStateChange={onEditorStateChange}
           />
         </Html>
