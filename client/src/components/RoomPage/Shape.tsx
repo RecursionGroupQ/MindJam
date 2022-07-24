@@ -49,19 +49,23 @@ const Shape: React.FC<Props> = ({ node }) => {
     }
     if (selectedNode && selectedNode.id !== node.id) {
       setNodes((prevState) => {
-        const currNode = prevState.get(node.id);
+        const selectNode = nodes.get(selectedNode.id) as Node;
+        const currNode = nodes.get(node.id);
         if (
           currNode &&
           !currNode.children.includes(selectedNode.id) &&
-          !selectedNode.children.includes(currNode.id) &&
+          !selectNode.children.includes(currNode.id) &&
           selectedNode.id !== currNode.id
         ) {
-          return new Map(
-            prevState.set(selectedNode.id, {
-              ...selectedNode,
-              children: [...selectedNode.children, currNode.id],
-            })
-          );
+          prevState.set(selectedNode.id, {
+            ...selectNode,
+            children: [...selectNode.children, currNode.id],
+          });
+          prevState.set(currNode.id, {
+            ...currNode,
+            parents: [...currNode.parents, selectedNode.id],
+          });
+          return new Map(prevState);
         }
         return prevState;
       });

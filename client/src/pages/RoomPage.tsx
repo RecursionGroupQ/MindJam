@@ -77,6 +77,7 @@ const RoomPage = () => {
         const newNode: Node = {
           id,
           children: [],
+          parents: [],
           text: `node-${id}`,
           shapeType,
           x: pointerPosition.x,

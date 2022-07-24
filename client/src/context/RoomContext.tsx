@@ -16,14 +16,15 @@ const generateNodes = () => {
     nodes.set(id, {
       id,
       children: [],
-      text: `<p>node-${id}</p>`,
+      parents: [],
+      text: `node-${id}`,
       shapeType: "rect" as ShapeType,
       x: Math.random() * CANVAS_WIDTH,
       y: Math.random() * CANVAS_HEIGHT,
       width: 380,
       height: 90,
-      fillStyle: "",
-      strokeStyle: fills[Math.floor(Math.random() * fills.length)],
+      fillStyle: "#fff",
+      strokeStyle: "#000",
     });
   }
   return nodes;
@@ -36,6 +37,7 @@ type Props = {
 export type Node = {
   id: string;
   children: string[];
+  parents: string[];
   text: string;
   shapeType: ShapeType;
   x: number;
