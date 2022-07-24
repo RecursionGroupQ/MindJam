@@ -2,10 +2,10 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import Konva from "konva";
 import { Group } from "react-konva";
 import { RoomContext, Node } from "../../context/RoomContext";
-import EditableText from "./EditableText";
 import RectShape from "./ShapeComponent/RectShape";
 import EllipseShape from "./ShapeComponent/EllipseShape";
 import StarShape from "./ShapeComponent/StarShape";
+import Text from "./Text";
 
 type Props = {
   node: Node;
@@ -14,7 +14,6 @@ type Props = {
 const Shape: React.FC<Props> = ({ node }) => {
   const { nodes, setNodes, selectedNode, setSelectedNode, selectedShapes, setSelectedShapes } = useContext(RoomContext);
   const shapeRef = useRef<Konva.Group>(null);
-  const [text, setText] = useState<string>(node.text);
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
   useEffect(() => {
@@ -117,11 +116,6 @@ const Shape: React.FC<Props> = ({ node }) => {
     }
   };
 
-  const onTextChange = (value: string) => {
-    // textの更新
-    setText(value);
-  };
-
   const onToggleEdit = () => {
     // 編集モードの切替
     setIsEditing(!isEditing);
@@ -139,22 +133,14 @@ const Shape: React.FC<Props> = ({ node }) => {
       onTap={handleClick}
       onTransform={handleTransform}
       onTransformEnd={handleTransformEnd}
+      onDblClick={onToggleEdit}
       name="mindmap-node"
     >
+      <Text node={node} isEditing={isEditing} onToggleEdit={onToggleEdit} />
       {node.shapeType === "rect" && <RectShape node={node} />}
       {node.shapeType === "ellipse" && <EllipseShape node={node} />}
       {/* <RegularPolygon sides={10} radius={70} fill="red" stroke="black" /> */}
       {node.shapeType === "star" && <StarShape node={node} />}
-
-      <EditableText
-        node={node}
-        x={0}
-        y={0}
-        text={text}
-        isEditing={isEditing}
-        onTextChange={onTextChange}
-        onToggleEdit={onToggleEdit}
-      />
     </Group>
   );
 };
