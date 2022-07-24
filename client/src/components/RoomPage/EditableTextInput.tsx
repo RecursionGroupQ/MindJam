@@ -70,7 +70,7 @@ const EditableTextInput: React.FC<Props> = ({ x, y, text, width, height, onChang
       <textarea
         ref={ref}
         value={text}
-        style={{ ...style, resize: "none" }}
+        style={{ ...style, resize: "none", textAlign: "center" }}
         onChange={onChange}
         onBlur={onBlur}
         onKeyDown={onKeyDown}

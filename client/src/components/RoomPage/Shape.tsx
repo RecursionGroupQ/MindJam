@@ -4,6 +4,7 @@ import { Group } from "react-konva";
 import { RoomContext, Node } from "../../context/RoomContext";
 import RectShape from "./ShapeComponent/RectShape";
 import EllipseShape from "./ShapeComponent/EllipseShape";
+import StarShape from "./ShapeComponent/StarShape";
 import Text from "./Text";
 
 type Props = {
@@ -21,28 +22,18 @@ const Shape: React.FC<Props> = ({ node }) => {
   }, [node.id]);
 
   const handleDragMove = (e: Konva.KonvaEventObject<DragEvent>) => {
-    setNodes(
-      nodes.map((currNode) => {
-        const { x, y } = e.target.position();
-        // check if currNode is in selectedShapes
-        const otherSelectedShape = selectedShapes.find((shape) => currNode.id === shape.getAttr("id")) as Konva.Group;
-        if (currNode.id === node.id) {
-          return {
-            ...currNode,
-            x,
-            y,
-          };
-        }
-        if (otherSelectedShape && otherSelectedShape.getAttr("id") !== node.id) {
-          return {
-            ...currNode,
-            x: otherSelectedShape.getAttr("x") as number,
-            y: otherSelectedShape.getAttr("y") as number,
-          };
-        }
-        return currNode;
-      })
-    );
+    setNodes((prevState) => {
+      const { x, y } = e.target.position();
+      const currNode = prevState.get(node.id);
+      if (!currNode) return prevState;
+      return new Map(
+        prevState.set(node.id, {
+          ...currNode,
+          x,
+          y,
+        })
+      );
+    });
   };
 
   const handleClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
@@ -57,23 +48,23 @@ const Shape: React.FC<Props> = ({ node }) => {
       return;
     }
     if (selectedNode && selectedNode.id !== node.id) {
-      setNodes(
-        nodes.map((currNode) => {
-          if (selectedNode.id === currNode.id) {
-            if (
-              !node.children.includes(currNode.id) &&
-              !currNode.children.includes(node.id) &&
-              currNode.id !== node.id
-            ) {
-              return {
-                ...currNode,
-                children: [...currNode.children, node.id],
-              };
-            }
-          }
-          return currNode;
-        })
-      );
+      setNodes((prevState) => {
+        const currNode = prevState.get(node.id);
+        if (
+          currNode &&
+          !currNode.children.includes(selectedNode.id) &&
+          !selectedNode.children.includes(currNode.id) &&
+          selectedNode.id !== currNode.id
+        ) {
+          return new Map(
+            prevState.set(selectedNode.id, {
+              ...selectedNode,
+              children: [...selectedNode.children, currNode.id],
+            })
+          );
+        }
+        return prevState;
+      });
       setSelectedNode(null);
       setSelectedShapes([]);
     } else {
@@ -85,59 +76,39 @@ const Shape: React.FC<Props> = ({ node }) => {
   const handleTransform = () => {
     if (shapeRef.current) {
       const currGroup = shapeRef.current;
-      setNodes(
-        nodes.map((currNode) => {
-          const otherSelectedShape = selectedShapes.find((shape) => currNode.id === shape.getAttr("id")) as Konva.Group;
-          if (currNode.id === node.id) {
-            return {
-              ...currNode,
-              x: currGroup.x(),
-              y: currGroup.y(),
-            };
-          }
-          if (otherSelectedShape && otherSelectedShape.getAttr("id") !== node.id) {
-            return {
-              ...currNode,
-              x: otherSelectedShape.getAttr("x") as number,
-              y: otherSelectedShape.getAttr("y") as number,
-            };
-          }
-          return currNode;
-        })
-      );
+      setNodes((prevState) => {
+        const currNode = nodes.get(node.id);
+        if (!currNode) return prevState;
+        return new Map(
+          prevState.set(node.id, {
+            ...currNode,
+            x: currGroup.x(),
+            y: currGroup.y(),
+          })
+        );
+      });
     }
   };
 
   const handleTransformEnd = () => {
     if (shapeRef.current) {
       const currGroup = shapeRef.current;
-
       const scaleX = currGroup.scaleX();
       const scaleY = currGroup.scaleY();
-
       currGroup.scaleX(1);
       currGroup.scaleY(1);
 
-      setNodes(
-        nodes.map((currNode) => {
-          const otherSelectedShape = selectedShapes.find((shape) => currNode.id === shape.getAttr("id")) as Konva.Group;
-          if (currNode.id === node.id) {
-            return {
-              ...currNode,
-              width: currNode.width * scaleX,
-              height: currNode.height * scaleY,
-            };
-          }
-          if (otherSelectedShape && otherSelectedShape.getAttr("id") !== node.id) {
-            return {
-              ...currNode,
-              width: currNode.width * scaleX,
-              height: currNode.height * scaleY,
-            };
-          }
-          return currNode;
-        })
-      );
+      setNodes((prevState) => {
+        const currNode = nodes.get(node.id);
+        if (!currNode) return prevState;
+        return new Map(
+          prevState.set(node.id, {
+            ...currNode,
+            width: node.width * scaleX,
+            height: node.height * scaleY,
+          })
+        );
+      });
     }
   };
 
@@ -145,12 +116,13 @@ const Shape: React.FC<Props> = ({ node }) => {
     // 編集モードの切替
     setIsEditing(!isEditing);
   };
-
   return (
     <Group
       ref={shapeRef}
       x={node.x}
       y={node.y}
+      offsetX={node.shapeType === "rect" ? node.width / 2 : 0}
+      offsetY={node.shapeType === "rect" ? node.height / 2 : 0}
       draggable
       onDragMove={handleDragMove}
       onClick={handleClick}
@@ -163,6 +135,8 @@ const Shape: React.FC<Props> = ({ node }) => {
       <Text node={node} isEditing={isEditing} onToggleEdit={onToggleEdit} />
       {node.shapeType === "rect" && <RectShape node={node} />}
       {node.shapeType === "ellipse" && <EllipseShape node={node} />}
+      {/* <RegularPolygon sides={10} radius={70} fill="red" stroke="black" /> */}
+      {node.shapeType === "star" && <StarShape node={node} />}
     </Group>
   );
 };
