@@ -3,10 +3,17 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSun, faMoon } from "@fortawesome/free-solid-svg-icons";
 import { RoomContext } from "../context/RoomContext";
+import useLogin from "../hooks/useLogin";
+import useLogout from "../hooks/useLogout";
+import { AuthContext } from "../context/AuthContext";
 
 const Header = () => {
   const { setStageStyle } = useContext(RoomContext);
   const [dark, setDark] = useState(false);
+  const { authState } = useContext(AuthContext);
+  const { googleLogin } = useLogin();
+  const { logout } = useLogout();
+
   return (
     <header className="bg-transparent text-gray-600 body-font z-50">
       <div className="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
@@ -58,9 +65,11 @@ const Header = () => {
         />
         <button
           type="button"
-          className="inline-flex items-center bg-gray-100 border-0 py-1 px-3 focus:outline-none hover:bg-gray-200 rounded text-base mt-4 md:mt-0"
+          className="inline-flex items-center bg-gray-500 border-0 py-1 px-3 focus:outline-none hover:bg-gray-200 rounded text-base mt-4 md:mt-0"
+          // eslint-disable-next-line @typescript-eslint/no-misused-promises
+          onClick={authState?.user ? logout : googleLogin}
         >
-          Login
+          {authState?.user ? "logout" : "login"}
           <svg
             fill="none"
             stroke="currentColor"
