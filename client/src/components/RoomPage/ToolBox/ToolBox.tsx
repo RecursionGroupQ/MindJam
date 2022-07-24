@@ -5,22 +5,22 @@ import NodeColorPanel from "./ToolBoxPanelComponent/NodeColorPanel";
 import NodeShapePanel from "./ToolBoxPanelComponent/NodeShapePanel";
 
 const ToolBox = () => {
-  const { setNodes, dark, history, index, setIndex } = useContext(RoomContext);
+  const { setNodes, dark, history, historyIndex, setHistoryIndex } = useContext(RoomContext);
   const handleUndo = () => {
-    if (index > 0) {
-      const prevIndex: number = index - 1;
+    if (historyIndex > 0) {
+      const prevIndex: number = historyIndex - 1;
       const newHistory = new Map(history[prevIndex]);
       setNodes(newHistory);
-      setIndex(prevIndex);
+      setHistoryIndex(prevIndex);
     }
   };
 
   const handleRedo = () => {
-    if (history.length - 1 > index) {
-      const frontIndex: number = index + 1;
+    if (history.length - 1 > historyIndex) {
+      const frontIndex: number = historyIndex + 1;
       const newHistory = new Map(history[frontIndex]);
       setNodes(newHistory);
-      setIndex(frontIndex);
+      setHistoryIndex(frontIndex);
     }
   };
 
@@ -28,9 +28,9 @@ const ToolBox = () => {
     ? "my-10 px-5 py-3 w-4/12 h-full grid grid-cols-4 #6b7280 border-4 rounded-2xl border-indigo-600"
     : "my-10 px-5 py-3 w-4/12 h-full grid grid-cols-6 #f8fafc border-4 rounded-2xl border-indigo-600";
 
-  const isUndo = index === 0 ? "opacity-25 w-full h-full" : "w-full h-full hover:bg-grey-300";
+  const isUndo = historyIndex === 0 ? "opacity-25 w-full h-full" : "w-full h-full hover:bg-grey-300";
 
-  const isRedo = index === history.length - 1 ? "opacity-25 w-full h-full" : "w-full h-full hover:bg-grey-300";
+  const isRedo = historyIndex === history.length - 1 ? "opacity-25 w-full h-full" : "w-full h-full hover:bg-grey-300";
   return (
     <div className="flex justify-center">
       <div className={darkOrLight}>
@@ -51,7 +51,7 @@ const ToolBox = () => {
             className="h-full w-full flex justify-center items-center"
             type="button"
             onClick={() => handleUndo()}
-            disabled={index === 0}
+            disabled={historyIndex === 0}
           >
             <FaUndo size={40} />
           </button>
@@ -61,7 +61,7 @@ const ToolBox = () => {
             className="h-full w-full flex justify-center items-center"
             type="button"
             onClick={() => handleRedo()}
-            disabled={index === history.length - 1}
+            disabled={historyIndex === history.length - 1}
           >
             <FaRedo size={40} />
           </button>

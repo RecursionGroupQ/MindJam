@@ -2,7 +2,7 @@ import { useContext } from "react";
 import { Node, RoomContext } from "../context/RoomContext";
 
 const useHistory = () => {
-  const { nodes, history, setHistory, setIndex } = useContext(RoomContext);
+  const { nodes, history, setHistory, setHistoryIndex } = useContext(RoomContext);
 
   const addHistoryByDoubleClick = (newNode: Node) => {
     const newMap = new Map(nodes);
@@ -10,7 +10,7 @@ const useHistory = () => {
     const newHistory = [...history];
     setHistory([...newHistory, newMap]);
     const len = history.length;
-    setIndex(len);
+    setHistoryIndex(len);
   };
 
   const addHistory = () => {
@@ -18,7 +18,7 @@ const useHistory = () => {
     const newHistory = [...history];
     setHistory([...newHistory, newMap]);
     const len = history.length;
-    setIndex(len);
+    setHistoryIndex(len);
   };
 
   return { addHistoryByDoubleClick, addHistory };

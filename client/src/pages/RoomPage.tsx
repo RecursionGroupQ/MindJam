@@ -75,12 +75,6 @@ const RoomPage = () => {
           strokeStyle,
         };
         setNodes((prevState) => new Map(prevState.set(newNode.id, newNode)));
-        // const newMap = new Map(nodes);
-        // newMap.set(newNode.id, newNode);
-        // const newUndo = [...history];
-        // setHistory([...newUndo, newMap]);
-        // const len = history.length;
-        // setIndex(len);
         addHistoryByDoubleClick(newNode);
       }
     }

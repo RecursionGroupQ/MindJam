@@ -85,8 +85,8 @@ type IRoomContext = {
   setDark: React.Dispatch<React.SetStateAction<boolean>>;
   history: Map<string, Node>[];
   setHistory: React.Dispatch<React.SetStateAction<Map<string, Node>[]>>;
-  index: number;
-  setIndex: React.Dispatch<React.SetStateAction<number>>;
+  historyIndex: number;
+  setHistoryIndex: React.Dispatch<React.SetStateAction<number>>;
 };
 export const RoomContext: React.Context<IRoomContext> = createContext({} as IRoomContext);
 
@@ -114,7 +114,7 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
   const [displayColorPicker, setDisplayColorPicker] = useState(false);
   const [dark, setDark] = useState(false);
   const [history, setHistory] = useState<Map<string, Node>[]>([new Map(nodes)]);
-  const [index, setIndex] = useState<number>(0);
+  const [historyIndex, setHistoryIndex] = useState<number>(0);
 
   useEffect(() => {
     if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
@@ -152,8 +152,8 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
       setDark,
       history,
       setHistory,
-      index,
-      setIndex,
+      historyIndex,
+      setHistoryIndex,
     }),
     [
       nodes,
@@ -168,7 +168,7 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
       displayColorPicker,
       dark,
       history,
-      index,
+      historyIndex,
     ]
   );
 
