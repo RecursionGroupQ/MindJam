@@ -73,7 +73,6 @@ const Shape: React.FC<Props> = ({ node }) => {
       setSelectedShapes([shapeRef.current as Konva.Group]);
     }
   };
-
   const handleTransform = () => {
     if (shapeRef.current) {
       const currGroup = shapeRef.current;
@@ -141,7 +140,6 @@ const Shape: React.FC<Props> = ({ node }) => {
       {node.shapeType === "ellipse" && <EllipseShape node={node} />}
       {/* <RegularPolygon sides={10} radius={70} fill="red" stroke="black" /> */}
       {node.shapeType === "star" && <StarShape node={node} />}
-
       <EditableText
         node={node}
         x={0}

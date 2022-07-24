@@ -1,31 +1,74 @@
-import React from "react";
-import NodeStylePanel from "./ToolBoxPanelComponent/NodeStylePanel";
+import React, { useContext } from "react";
+import { FaUndo, FaRedo } from "react-icons/fa";
+import { RoomContext } from "../../../context/RoomContext";
+import NodeColorPanel from "./ToolBoxPanelComponent/NodeColorPanel";
+import NodeShapePanel from "./ToolBoxPanelComponent/NodeShapePanel";
 
-const ToolBox = () => (
-  <div className="flex justify-center">
-    <div className="mt-10 w-1/6 flex justify-around bg-white border-2 rounded-full border-gray-300">
-      <div className="pl-3 pt-4 pb-3">
-        <NodeStylePanel />
-      </div>
-      <div className="pl-3 pt-4 pb-3">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="45"
-          height="45"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="black"
-          strokeWidth="1"
-          strokeLinecap="round"
-          strokeLinejoin="bevel"
-        >
-          <polyline points="4 7 4 4 20 4 20 7" />
-          <line x1="9" y1="20" x2="15" y2="20" />
-          <line x1="12" y1="4" x2="12" y2="20" />
-        </svg>
+const ToolBox = () => {
+  const { setNodes, dark, history, index, setIndex } = useContext(RoomContext);
+  const handleUndo = () => {
+    if (index > 0) {
+      const prevIndex: number = index - 1;
+      const newHistory = new Map(history[prevIndex]);
+      setNodes(newHistory);
+      setIndex(prevIndex);
+    }
+  };
+
+  const handleRedo = () => {
+    if (history.length - 1 > index) {
+      const frontIndex: number = index + 1;
+      const newHistory = new Map(history[frontIndex]);
+      setNodes(newHistory);
+      setIndex(frontIndex);
+    }
+  };
+
+  const darkOrLight = dark
+    ? "my-10 px-5 py-3 w-4/12 h-full grid grid-cols-4 #6b7280 border-4 rounded-2xl border-indigo-600"
+    : "my-10 px-5 py-3 w-4/12 h-full grid grid-cols-6 #f8fafc border-4 rounded-2xl border-indigo-600";
+
+  const isUndo = index === 0 ? "opacity-25 w-full h-full" : "w-full h-full hover:bg-grey-300";
+
+  const isRedo = index === history.length - 1 ? "opacity-25 w-full h-full" : "w-full h-full hover:bg-grey-300";
+  return (
+    <div className="flex justify-center">
+      <div className={darkOrLight}>
+        <div className="w-full h-full flex items-center hover:bg-grey-300">
+          <NodeColorPanel value="fill" />
+        </div>
+        <div className="w-full h-full flex items-center hover:bg-grey-300">
+          <NodeColorPanel value="stroke" />
+        </div>
+        <div className="w-full h-full flex items-center hover:bg-grey-300">
+          <NodeColorPanel value="line" />
+        </div>
+        <div className="w-full h-full flex items-center hover:bg-grey-300">
+          <NodeShapePanel />
+        </div>
+        <div className={isUndo}>
+          <button
+            className="h-full w-full flex justify-center items-center"
+            type="button"
+            onClick={() => handleUndo()}
+            disabled={index === 0}
+          >
+            <FaUndo size={40} />
+          </button>
+        </div>
+        <div className={isRedo}>
+          <button
+            className="h-full w-full flex justify-center items-center"
+            type="button"
+            onClick={() => handleRedo()}
+            disabled={index === history.length - 1}
+          >
+            <FaRedo size={40} />
+          </button>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default ToolBox;

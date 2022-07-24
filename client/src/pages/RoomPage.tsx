@@ -2,10 +2,12 @@ import React, { useContext, useRef, useEffect, useState } from "react";
 import { Stage, Layer, Transformer, Rect } from "react-konva";
 import Konva from "konva";
 import { nanoid } from "nanoid";
+
 import { Node, RoomContext, CANVAS_WIDTH, CANVAS_HEIGHT } from "../context/RoomContext";
 import Edge from "../components/RoomPage/Edge";
 import Shape from "../components/RoomPage/Shape";
 import ToolBox from "../components/RoomPage/ToolBox/ToolBox";
+import useHistory from "../hooks/useHistory";
 
 const RoomPage = () => {
   const {
@@ -22,6 +24,9 @@ const RoomPage = () => {
     fillStyle,
     strokeStyle,
     setDisplayColorPicker,
+    // history,
+    // setHistory,
+    // setIndex,
   } = useContext(RoomContext);
 
   const [canDragStage, setCanDragStage] = useState(true);
@@ -29,6 +34,7 @@ const RoomPage = () => {
   const selectionRectRef = useRef<Konva.Rect>(null);
   const [selectionRectCoords, setSelectionRectCoords] = useState({ x1: 0, y1: 0 });
   const stageRef = useRef<Konva.Stage>(null);
+  const { addHistoryByDoubleClick } = useHistory();
 
   useEffect(() => {
     if (selectedShapes) {
@@ -68,7 +74,14 @@ const RoomPage = () => {
           fillStyle,
           strokeStyle,
         };
-        setNodes((prevState) => new Map(prevState.set(id, newNode)));
+        setNodes((prevState) => new Map(prevState.set(newNode.id, newNode)));
+        // const newMap = new Map(nodes);
+        // newMap.set(newNode.id, newNode);
+        // const newUndo = [...history];
+        // setHistory([...newUndo, newMap]);
+        // const len = history.length;
+        // setIndex(len);
+        addHistoryByDoubleClick(newNode);
       }
     }
   };
@@ -211,7 +224,7 @@ const RoomPage = () => {
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onDblClick={handleDoubleClick}
-            onDblTap={handleDoubleClick}
+            // onDblTap={handleDoubleClick}
             onWheel={handleWheel}
           >
             <RoomContext.Provider value={value}>

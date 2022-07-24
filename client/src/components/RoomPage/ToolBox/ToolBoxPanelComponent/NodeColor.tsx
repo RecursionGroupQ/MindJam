@@ -34,7 +34,7 @@ const NodeColor: React.FC<Props> = ({ value }) => {
     <>
       <div className="grid grid-cols-7">
         {colorData.map((color) => (
-          <div key={color}>
+          <div key={color} className="py-3 px-1">
             <ColorButton color={color} value={value} />
           </div>
         ))}

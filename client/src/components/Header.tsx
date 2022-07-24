@@ -1,12 +1,12 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSun, faMoon } from "@fortawesome/free-solid-svg-icons";
 import { RoomContext } from "../context/RoomContext";
 
 const Header = () => {
-  const { setStageStyle } = useContext(RoomContext);
-  const [dark, setDark] = useState(false);
+  const { setStageStyle, dark, setDark } = useContext(RoomContext);
+
   return (
     <header className="bg-transparent text-gray-600 body-font z-50">
       <div className="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
