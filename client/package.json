@@ -14,6 +14,7 @@
     "@types/node": "^16.11.42",
     "@types/react": "^18.0.14",
     "@types/react-dom": "^18.0.5",
+    "firebase": "^9.9.1",
     "konva": "^8.3.10",
     "nanoid": "^4.0.0",
     "react": "^18.2.0",
