@@ -24,9 +24,6 @@ const RoomPage = () => {
     fillStyle,
     strokeStyle,
     setDisplayColorPicker,
-    // history,
-    // setHistory,
-    // setIndex,
   } = useContext(RoomContext);
 
   const [canDragStage, setCanDragStage] = useState(true);

@@ -4,8 +4,7 @@ import { Popover, PopoverHandler, PopoverContent } from "@material-tailwind/reac
 
 import { BsPencilSquare } from "react-icons/bs";
 import { IoMdColorFill } from "react-icons/io";
-import { MdOutlineBorderColor } from "react-icons/md";
-import { MdOutlineHorizontalRule } from "react-icons/md";
+import { MdOutlineBorderColor, MdOutlineHorizontalRule } from "react-icons/md";
 
 import NodeColor from "./NodeColor";
 import { RoomContext } from "../../../../context/RoomContext";
