@@ -25,7 +25,7 @@ const ToolBox = () => {
   };
 
   const darkOrLight = dark
-    ? "my-10 px-5 py-3 w-4/12 h-full grid grid-cols-4 #6b7280 border-4 rounded-2xl border-indigo-600"
+    ? "my-10 px-5 py-3 w-4/12 h-full grid grid-cols-6 #6b7280 border-4 rounded-2xl border-indigo-600"
     : "my-10 px-5 py-3 w-4/12 h-full grid grid-cols-6 #f8fafc border-4 rounded-2xl border-indigo-600";
 
   const isUndo = historyIndex === 0 ? "opacity-25 w-full h-full" : "w-full h-full hover:bg-grey-300";
