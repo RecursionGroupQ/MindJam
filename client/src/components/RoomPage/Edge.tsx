@@ -65,7 +65,7 @@ const Edge: React.FC<Props> = ({ node, childId }) => {
   return (
     <Group onMouseOver={() => setIsMouseOver(true)} onMouseLeave={() => setIsMouseOver(false)}>
       <Shape
-        key={`${node.id}_${childId}`}
+        key={`line_${node.id}_${childId}`}
         points={points}
         sceneFunc={(context, shape) => {
           if (Math.abs(width) > Math.abs(height)) {
@@ -112,6 +112,7 @@ const Edge: React.FC<Props> = ({ node, childId }) => {
       />
       {isMouseOver && (
         <Image
+          key={`deleteBtn_${node.id}_${childId}`}
           onClick={() => {
             setIsMouseOver(false);
             setButtonHover(false);

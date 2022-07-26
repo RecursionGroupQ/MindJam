@@ -253,7 +253,9 @@ const RoomPage = () => {
               <Layer>
                 {Array.from(nodes.keys()).map((key) => {
                   const currNode = nodes.get(key) as Node;
-                  return currNode.children.map((childId) => <Edge node={currNode} childId={childId} />);
+                  return currNode.children.map((childId) => (
+                    <Edge key={`edge_${currNode.id}_${childId}`} node={currNode} childId={childId} />
+                  ));
                 })}
                 {Array.from(nodes.keys()).map((key) => (
                   <Shape key={key} node={nodes.get(key) as Node} />
