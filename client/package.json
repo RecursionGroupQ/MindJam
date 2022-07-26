@@ -19,9 +19,9 @@
     "@types/react-draft-wysiwyg": "^1.13.4",
     "draft-js": "^0.11.7",
     "draftjs-to-html": "^0.9.1",
+    "firebase": "^9.9.1",
     "html-to-draftjs": "^1.5.0",
     "immutable": "^4.1.0",
-    "firebase": "^9.9.1",
     "konva": "^8.3.10",
     "nanoid": "^4.0.0",
     "react": "^18.2.0",
@@ -33,6 +33,7 @@
     "react-router-dom": "^6.3.0",
     "react-scripts": "5.0.1",
     "typescript": "^4.7.4",
+    "use-image": "^1.0.12",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
