@@ -140,6 +140,13 @@ const RoomPage = () => {
     }
   };
 
+  const handleDragStart = (e: Konva.KonvaEventObject<DragEvent>) => {
+    if (e.target === stageRef.current && canDragStage) {
+      const container = stageRef.current.container();
+      if (container) container.style.cursor = "grabbing";
+    }
+  };
+
   // マウスドラッグで Canvas 内を移動
   const handleDragMove = (e: Konva.KonvaEventObject<DragEvent>) => {
     if (e.target === stageRef.current && canDragStage) {
@@ -147,6 +154,13 @@ const RoomPage = () => {
         ...prevState,
         backgroundPosition: `${e.target.x()}px ${e.target.y()}px`,
       }));
+    }
+  };
+
+  const handleDragEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
+    if (e.target === stageRef.current && canDragStage) {
+      const container = stageRef.current.container();
+      if (container) container.style.cursor = "auto";
     }
   };
 
@@ -232,7 +246,9 @@ const RoomPage = () => {
             width={CANVAS_WIDTH}
             height={CANVAS_HEIGHT}
             draggable={canDragStage}
+            onDragStart={handleDragStart}
             onDragMove={handleDragMove}
+            onDragEnd={handleDragEnd}
             onClick={handleClick}
             onTap={handleClick}
             onMouseDown={handleMouseDown}
@@ -244,9 +260,12 @@ const RoomPage = () => {
           >
             <RoomContext.Provider value={value}>
               <Layer>
-                {Array.from(nodes.keys()).map((key) => (
-                  <Edge key={key} node={nodes.get(key) as Node} />
-                ))}
+                {Array.from(nodes.keys()).map((key) => {
+                  const currNode = nodes.get(key) as Node;
+                  return currNode.children.map((childId) => (
+                    <Edge key={`edge_${currNode.id}_${childId}`} node={currNode} childId={childId} />
+                  ));
+                })}
                 {Array.from(nodes.keys()).map((key) => (
                   <Shape key={key} node={nodes.get(key) as Node} />
                 ))}
