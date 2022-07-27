@@ -31,7 +31,7 @@ const RoomPage = () => {
   const selectionRectRef = useRef<Konva.Rect>(null);
   const [selectionRectCoords, setSelectionRectCoords] = useState({ x1: 0, y1: 0 });
   const stageRef = useRef<Konva.Stage>(null);
-  const { addHistoryByDoubleClick } = useHistory();
+  const { addToHistory } = useHistory();
 
   useEffect(() => {
     if (selectedShapes) {
@@ -71,8 +71,13 @@ const RoomPage = () => {
           fillStyle,
           strokeStyle,
         };
-        setNodes((prevState) => new Map(prevState.set(newNode.id, newNode)));
-        addHistoryByDoubleClick(newNode);
+        setNodes((prevState) => {
+          prevState.set(newNode.id, newNode);
+          addToHistory(prevState);
+          return new Map(prevState);
+        });
+        // addHistoryByDoubleClick(newNode);
+        // addHistory();
       }
     }
   };

@@ -6,7 +6,7 @@ const useChangeNodeStyle = () => {
   const { nodes, setNodes, selectedNode, selectedShapes, setFillStyle, setStrokeStyle, setLineStyle, setShapeType } =
     useContext(RoomContext);
 
-  const { addHistory } = useHistory();
+  const { addToHistory } = useHistory();
 
   const changeNodeColors = (color: string, value: "fill" | "stroke" | "line") => {
     if (value === "fill") {
@@ -22,7 +22,7 @@ const useChangeNodeStyle = () => {
             })
           );
         });
-        addHistory();
+        // addHistory();
       } else if (selectedShapes.length >= 2) {
         setNodes((prevState) => {
           const updatedNodes = new Map(prevState);
@@ -37,7 +37,7 @@ const useChangeNodeStyle = () => {
           });
           return updatedNodes;
         });
-        addHistory();
+        // addHistory();
       }
       setFillStyle(color);
     } else if (value === "stroke") {
@@ -52,7 +52,7 @@ const useChangeNodeStyle = () => {
             })
           );
         });
-        addHistory();
+        // addHistory();
       } else if (selectedShapes.length >= 2) {
         setNodes((prevState) => {
           const updatedNodes = new Map(prevState);
@@ -67,7 +67,7 @@ const useChangeNodeStyle = () => {
           });
           return updatedNodes;
         });
-        addHistory();
+        // addHistory();
       }
       setStrokeStyle(color);
     } else if (value === "line") {
@@ -81,14 +81,13 @@ const useChangeNodeStyle = () => {
       setNodes((prevState) => {
         const currNode = nodes.get(selectedNode.id);
         if (!currNode) return prevState;
-        return new Map(
-          prevState.set(selectedNode.id, {
-            ...currNode,
-            shapeType,
-          })
-        );
+        prevState.set(selectedNode.id, {
+          ...currNode,
+          shapeType,
+        });
+        addToHistory(prevState);
+        return new Map(prevState);
       });
-      addHistory();
     } else if (selectedShapes.length >= 2) {
       setNodes((prevState) => {
         const updatedNodes = new Map(prevState);
@@ -101,9 +100,9 @@ const useChangeNodeStyle = () => {
             shapeType,
           });
         });
+        addToHistory(updatedNodes);
         return updatedNodes;
       });
-      addHistory();
     }
     setShapeType(shapeType);
   };
