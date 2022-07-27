@@ -2,10 +2,12 @@ import React, { useContext, useRef, useEffect, useState } from "react";
 import { Stage, Layer, Transformer, Rect } from "react-konva";
 import Konva from "konva";
 import { nanoid } from "nanoid";
+
 import { Node, RoomContext, CANVAS_WIDTH, CANVAS_HEIGHT } from "../context/RoomContext";
 import Edge from "../components/RoomPage/Edge";
 import Shape from "../components/RoomPage/Shape";
 import ToolBox from "../components/RoomPage/ToolBox/ToolBox";
+import useHistory from "../hooks/useHistory";
 
 const RoomPage = () => {
   const {
@@ -30,6 +32,7 @@ const RoomPage = () => {
   const selectionRectRef = useRef<Konva.Rect>(null);
   const [selectionRectCoords, setSelectionRectCoords] = useState({ x1: 0, y1: 0 });
   const stageRef = useRef<Konva.Stage>(null);
+  const { addToHistory } = useHistory();
 
   useEffect(() => {
     if (stageRef.current) {
@@ -87,7 +90,13 @@ const RoomPage = () => {
           fillStyle,
           strokeStyle,
         };
-        setNodes((prevState) => new Map(prevState.set(id, newNode)));
+        setNodes((prevState) => {
+          prevState.set(newNode.id, newNode);
+          addToHistory(prevState);
+          return new Map(prevState);
+        });
+        // addHistoryByDoubleClick(newNode);
+        // addHistory();
       }
     }
   };
@@ -230,7 +239,7 @@ const RoomPage = () => {
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onDblClick={handleDoubleClick}
-            onDblTap={handleDoubleClick}
+            // onDblTap={handleDoubleClick}
             onWheel={handleWheel}
           >
             <RoomContext.Provider value={value}>

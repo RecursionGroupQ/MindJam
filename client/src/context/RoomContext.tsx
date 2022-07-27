@@ -73,6 +73,8 @@ type IRoomContext = {
   setFillStyle: React.Dispatch<React.SetStateAction<string>>;
   strokeStyle: string;
   setStrokeStyle: React.Dispatch<React.SetStateAction<string>>;
+  lineStyle: string;
+  setLineStyle: React.Dispatch<React.SetStateAction<string>>;
   selectedShapes: Konva.Group[];
   setSelectedShapes: React.Dispatch<React.SetStateAction<Konva.Group[]>>;
   stageConfig: StageConfig;
@@ -83,8 +85,13 @@ type IRoomContext = {
   setStageRef: React.Dispatch<React.SetStateAction<React.RefObject<Konva.Stage> | null>>;
   displayColorPicker: boolean;
   setDisplayColorPicker: React.Dispatch<React.SetStateAction<boolean>>;
+  dark: boolean;
+  setDark: React.Dispatch<React.SetStateAction<boolean>>;
+  history: Map<string, Node>[];
+  setHistory: React.Dispatch<React.SetStateAction<Map<string, Node>[]>>;
+  historyIndex: number;
+  setHistoryIndex: React.Dispatch<React.SetStateAction<number>>;
 };
-
 export const RoomContext: React.Context<IRoomContext> = createContext({} as IRoomContext);
 
 export const RoomContextProvider: React.FC<Props> = ({ children }) => {
@@ -92,8 +99,9 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
   const [nodes, setNodes] = useState<Map<string, Node>>(generateNodes());
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [shapeType, setShapeType] = useState<ShapeType>("rect");
-  const [fillStyle, setFillStyle] = useState<string>("#ffffff");
-  const [strokeStyle, setStrokeStyle] = useState<string>("#0000ff");
+  const [fillStyle, setFillStyle] = useState<string>("#00000000");
+  const [strokeStyle, setStrokeStyle] = useState<string>("#000000");
+  const [lineStyle, setLineStyle] = useState<string>("#000000");
   const [selectedShapes, setSelectedShapes] = useState<Konva.Group[]>([]);
   const [stageConfig, setStageConfig] = useState<StageConfig>({
     stageScale: 0.8,
@@ -108,6 +116,9 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
     backgroundPosition: "0px 0px",
   });
   const [displayColorPicker, setDisplayColorPicker] = useState(false);
+  const [dark, setDark] = useState(false);
+  const [history, setHistory] = useState<Map<string, Node>[]>([new Map(nodes)]);
+  const [historyIndex, setHistoryIndex] = useState<number>(0);
 
   useEffect(() => {
     if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
@@ -133,6 +144,8 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
       setFillStyle,
       strokeStyle,
       setStrokeStyle,
+      lineStyle,
+      setLineStyle,
       selectedShapes,
       setSelectedShapes,
       stageConfig,
@@ -141,6 +154,12 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
       setStageStyle,
       displayColorPicker,
       setDisplayColorPicker,
+      dark,
+      setDark,
+      history,
+      setHistory,
+      historyIndex,
+      setHistoryIndex,
     }),
     [
       nodes,
@@ -151,7 +170,11 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
       shapeType,
       fillStyle,
       strokeStyle,
+      lineStyle,
       displayColorPicker,
+      dark,
+      history,
+      historyIndex,
       stageRef,
     ]
   );

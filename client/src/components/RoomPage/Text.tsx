@@ -6,6 +6,7 @@ import draftToHtml from "draftjs-to-html";
 import htmlToDraft from "html-to-draftjs";
 import { RoomContext, Node } from "../../context/RoomContext";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
+import useHistory from "../../hooks/useHistory";
 
 type Props = {
   node: Node;
@@ -17,6 +18,7 @@ const Text: React.FC<Props> = ({ node, isEditing, onToggleEdit }) => {
   const { stageConfig, stageRef, setNodes } = useContext(RoomContext);
   const [text, setText] = useState<string>(node.text);
   const textRef = useRef<HTMLDivElement | null>(null);
+  const { addToHistory } = useHistory();
 
   useEffect(() => {
     if (stageRef && stageRef.current && !isEditing) {
@@ -36,12 +38,12 @@ const Text: React.FC<Props> = ({ node, isEditing, onToggleEdit }) => {
     setNodes((prevState) => {
       const currNode = prevState.get(node.id);
       if (!currNode) return prevState;
-      return new Map(
-        prevState.set(node.id, {
-          ...currNode,
-          text,
-        })
-      );
+      prevState.set(node.id, {
+        ...currNode,
+        text,
+      });
+      addToHistory(prevState);
+      return new Map(prevState);
     });
   };
 
@@ -51,7 +53,7 @@ const Text: React.FC<Props> = ({ node, isEditing, onToggleEdit }) => {
     setText(html);
   };
 
-  const contentBlocks = htmlToDraft(text);
+  const contentBlocks = htmlToDraft(node.text);
   const contentState = ContentState.createFromBlockArray(contentBlocks.contentBlocks, contentBlocks.entityMap);
 
   return (
@@ -112,7 +114,7 @@ const Text: React.FC<Props> = ({ node, isEditing, onToggleEdit }) => {
             aria-hidden="true"
           >
             {/* eslint-disable-next-line react/no-danger */}
-            <div dangerouslySetInnerHTML={{ __html: text }} style={{ width: node.width, height: node.height }} />
+            <div dangerouslySetInnerHTML={{ __html: node.text }} style={{ width: node.width, height: node.height }} />
           </div>
         </Html>
       )}

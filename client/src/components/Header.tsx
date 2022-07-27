@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSun, faMoon } from "@fortawesome/free-solid-svg-icons";
@@ -8,8 +8,7 @@ import useLogout from "../hooks/useLogout";
 import { AuthContext } from "../context/AuthContext";
 
 const Header = () => {
-  const { setStageStyle } = useContext(RoomContext);
-  const [dark, setDark] = useState(false);
+  const { setStageStyle, dark, setDark } = useContext(RoomContext);
   const { authState } = useContext(AuthContext);
   const { googleLogin } = useLogin();
   const { logout } = useLogout();
