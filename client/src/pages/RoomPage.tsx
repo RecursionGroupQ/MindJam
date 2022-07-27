@@ -21,6 +21,7 @@ const RoomPage = () => {
     stageStyle,
     setStageStyle,
     shapeType,
+    setStageRef,
     fillStyle,
     strokeStyle,
     setDisplayColorPicker,
@@ -32,6 +33,12 @@ const RoomPage = () => {
   const [selectionRectCoords, setSelectionRectCoords] = useState({ x1: 0, y1: 0 });
   const stageRef = useRef<Konva.Stage>(null);
   const { addToHistory } = useHistory();
+
+  useEffect(() => {
+    if (stageRef.current) {
+      setStageRef(stageRef);
+    }
+  }, [setStageRef]);
 
   useEffect(() => {
     if (selectedShapes) {
@@ -49,19 +56,31 @@ const RoomPage = () => {
     window.addEventListener("keyup", () => {
       setCanDragStage(true);
     });
+
+    return () => {
+      window.removeEventListener("keydown", (e: KeyboardEvent) => {
+        if (e.shiftKey) {
+          setCanDragStage(false);
+        }
+      });
+      window.removeEventListener("keyup", () => {
+        setCanDragStage(true);
+      });
+    };
   }, []);
 
   // ダブルクリックでノードを追加
   const handleDoubleClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
     const stage = e.target.getStage();
     let pointerPosition = null;
-    if (stage) {
+    if (e.target === stageRef.current && stage) {
       pointerPosition = stage.getRelativePointerPosition();
       if (pointerPosition) {
         const id = nanoid();
         const newNode: Node = {
           id,
           children: [],
+          parents: [],
           text: `node-${id}`,
           shapeType,
           x: pointerPosition.x,

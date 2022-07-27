@@ -16,14 +16,15 @@ const generateNodes = () => {
     nodes.set(id, {
       id,
       children: [],
+      parents: [],
       text: `node-${id}`,
       shapeType: "rect" as ShapeType,
       x: Math.random() * CANVAS_WIDTH,
       y: Math.random() * CANVAS_HEIGHT,
       width: 380,
       height: 90,
-      fillStyle: "",
-      strokeStyle: fills[Math.floor(Math.random() * fills.length)],
+      fillStyle: "#fff",
+      strokeStyle: "#000",
     });
   }
   return nodes;
@@ -36,6 +37,7 @@ type Props = {
 export type Node = {
   id: string;
   children: string[];
+  parents: string[];
   text: string;
   shapeType: ShapeType;
   x: number;
@@ -79,6 +81,8 @@ type IRoomContext = {
   setStageConfig: React.Dispatch<React.SetStateAction<StageConfig>>;
   stageStyle: StageStyle;
   setStageStyle: React.Dispatch<React.SetStateAction<StageStyle>>;
+  stageRef: React.RefObject<Konva.Stage> | null;
+  setStageRef: React.Dispatch<React.SetStateAction<React.RefObject<Konva.Stage> | null>>;
   displayColorPicker: boolean;
   setDisplayColorPicker: React.Dispatch<React.SetStateAction<boolean>>;
   dark: boolean;
@@ -91,7 +95,7 @@ type IRoomContext = {
 export const RoomContext: React.Context<IRoomContext> = createContext({} as IRoomContext);
 
 export const RoomContextProvider: React.FC<Props> = ({ children }) => {
-  // const [nodes, setNodes] = useState<Node[]>(generateNodes());
+  const [stageRef, setStageRef] = useState<React.RefObject<Konva.Stage> | null>(null);
   const [nodes, setNodes] = useState<Map<string, Node>>(generateNodes());
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [shapeType, setShapeType] = useState<ShapeType>("rect");
@@ -128,6 +132,8 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
 
   const value = useMemo(
     () => ({
+      stageRef,
+      setStageRef,
       nodes,
       setNodes,
       selectedNode,
@@ -169,6 +175,7 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
       dark,
       history,
       historyIndex,
+      stageRef,
     ]
   );
 

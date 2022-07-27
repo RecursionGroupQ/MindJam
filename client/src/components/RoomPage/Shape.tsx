@@ -2,11 +2,11 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import Konva from "konva";
 import { Group } from "react-konva";
 import { RoomContext, Node } from "../../context/RoomContext";
-import EditableText from "./EditableText";
 import RectShape from "./ShapeComponent/RectShape";
 import EllipseShape from "./ShapeComponent/EllipseShape";
 import StarShape from "./ShapeComponent/StarShape";
 import useHistory from "../../hooks/useHistory";
+import Text from "./Text";
 
 type Props = {
   node: Node;
@@ -15,7 +15,6 @@ type Props = {
 const Shape: React.FC<Props> = ({ node }) => {
   const { nodes, setNodes, selectedNode, setSelectedNode, selectedShapes, setSelectedShapes } = useContext(RoomContext);
   const shapeRef = useRef<Konva.Group>(null);
-  const [text, setText] = useState<string>(node.text);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const { addToHistory } = useHistory();
 
@@ -67,20 +66,25 @@ const Shape: React.FC<Props> = ({ node }) => {
     }
     if (selectedNode && selectedNode.id !== node.id) {
       setNodes((prevState) => {
-        const currNode = prevState.get(node.id);
+        const selectNode = nodes.get(selectedNode.id) as Node;
+        const currNode = nodes.get(node.id);
         if (
           currNode &&
           !currNode.children.includes(selectedNode.id) &&
-          !selectedNode.children.includes(currNode.id) &&
+          !selectNode.children.includes(currNode.id) &&
           selectedNode.id !== currNode.id
         ) {
-          return new Map(
-            prevState.set(selectedNode.id, {
-              ...selectedNode,
-              children: [...selectedNode.children, currNode.id],
-            })
-          );
+          prevState.set(selectedNode.id, {
+            ...selectNode,
+            children: [...selectNode.children, currNode.id],
+          });
+          prevState.set(currNode.id, {
+            ...currNode,
+            parents: [...currNode.parents, selectedNode.id],
+          });
+          return new Map(prevState);
         }
+        addToHistory(prevState);
         return prevState;
       });
       setSelectedNode(null);
@@ -130,11 +134,6 @@ const Shape: React.FC<Props> = ({ node }) => {
     }
   };
 
-  const onTextChange = (value: string) => {
-    // textの更新
-    setText(value);
-  };
-
   const onToggleEdit = () => {
     // 編集モードの切替
     setIsEditing(!isEditing);
@@ -153,21 +152,14 @@ const Shape: React.FC<Props> = ({ node }) => {
       onTap={handleClick}
       onTransform={handleTransform}
       onTransformEnd={handleTransformEnd}
+      onDblClick={onToggleEdit}
       name="mindmap-node"
     >
+      <Text node={node} isEditing={isEditing} onToggleEdit={onToggleEdit} />
       {node.shapeType === "rect" && <RectShape node={node} />}
       {node.shapeType === "ellipse" && <EllipseShape node={node} />}
       {/* <RegularPolygon sides={10} radius={70} fill="red" stroke="black" /> */}
       {node.shapeType === "star" && <StarShape node={node} />}
-      <EditableText
-        node={node}
-        x={0}
-        y={0}
-        text={text}
-        isEditing={isEditing}
-        onTextChange={onTextChange}
-        onToggleEdit={onToggleEdit}
-      />
     </Group>
   );
 };
