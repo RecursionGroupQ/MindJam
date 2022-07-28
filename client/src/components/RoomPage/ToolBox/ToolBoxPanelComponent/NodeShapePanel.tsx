@@ -16,7 +16,7 @@ const NodeShapePanel = () => {
     changeNodeShapes(displayShapeType);
   };
   return (
-    <Popover placement="bottom">
+    <Popover placement="top">
       {shapeType === "rect" && (
         <PopoverHandler>
           <div className="h-full w-full flex justify-center items-center">
@@ -45,7 +45,7 @@ const NodeShapePanel = () => {
         </PopoverHandler>
       )}
       <PopoverContent>
-        <div className="flex">
+        <div className="flex mb-10">
           <BiRectangle
             size={40}
             color="black"

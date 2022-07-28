@@ -2,6 +2,7 @@ import React, { useContext, useRef, useEffect, useState } from "react";
 import { Stage, Layer, Transformer, Rect } from "react-konva";
 import Konva from "konva";
 import { nanoid } from "nanoid";
+import { motion } from "framer-motion";
 
 import { Node, RoomContext, CANVAS_WIDTH, CANVAS_HEIGHT } from "../context/RoomContext";
 import Edge from "../components/RoomPage/Edge";
@@ -232,7 +233,13 @@ const RoomPage = () => {
 
   return (
     <>
-      <ToolBox />
+      <motion.div
+        initial={{ x: 30, y: 2000, scale: 0 }}
+        animate={{ x: 30, y: 1500, scale: 1 }}
+        transition={{ duration: 0.8 }}
+      >
+        <ToolBox />
+      </motion.div>
       <RoomContext.Consumer>
         {(value) => (
           <Stage

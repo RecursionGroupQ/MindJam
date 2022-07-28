@@ -17,7 +17,7 @@ const NodeColorPanel: React.FC<Props> = ({ value }) => {
   const { fillStyle, strokeStyle, lineStyle } = useContext(RoomContext);
 
   return (
-    <Popover placement="bottom-start">
+    <Popover placement="top">
       {value === "fill" && (
         <PopoverHandler>
           <div className="h-full w-full flex justify-center">
@@ -48,7 +48,7 @@ const NodeColorPanel: React.FC<Props> = ({ value }) => {
           </div>
         </PopoverHandler>
       )}
-      <PopoverContent className="bg-indigo-200">
+      <PopoverContent className="bg-grey-300">
         <NodeColor value={value} />
       </PopoverContent>
     </Popover>
