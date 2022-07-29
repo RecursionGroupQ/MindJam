@@ -234,8 +234,8 @@ const RoomPage = () => {
   return (
     <>
       <motion.div
-        initial={{ x: 30, y: 2000, scale: 0 }}
-        animate={{ x: 30, y: 1500, scale: 1 }}
+        initial={{ y: window.innerHeight + 200, scale: 0 }}
+        animate={{ y: window.innerHeight - 50, scale: 1 }}
         transition={{ duration: 0.8 }}
       >
         <ToolBox />
