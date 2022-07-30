@@ -1,0 +1,134 @@
+.RichEditor-root {
+  background: #fff;
+  border: 1px solid #ddd;
+  font-family: 'Georgia', serif;
+  font-size: 14px;
+  padding: 15px;
+}
+
+.RichEditor-editor {
+  border-top: 1px solid #ddd;
+  cursor: text;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+.RichEditor-editor .public-DraftEditorPlaceholder-root,
+.RichEditor-editor .public-DraftEditor-content {
+  margin: 0 -15px -15px;
+  padding: 15px;
+}
+
+.RichEditor-editor .public-DraftEditor-content {
+  min-height: 100px;
+}
+
+.RichEditor-hidePlaceholder .public-DraftEditorPlaceholder-root {
+  display: none;
+}
+
+.RichEditor-blockquote {
+  border-left: 5px solid #eee;
+  color: #666;
+  font-family: 'Hoefler Text', 'Georgia', serif;
+  font-style: italic;
+  margin: 16px 0;
+  padding: 10px 20px;
+}
+
+.align-right div {
+    text-align: right;
+  }
+
+.align-center div {
+    text-align: center;
+  }
+
+.align-center div {
+    text-align: center;
+  }
+
+
+.RichEditor-editor .public-DraftStyleDefault-pre {
+  background-color: rgba(0, 0, 0, 0.05);
+  font-family: 'Inconsolata', 'Menlo', 'Consolas', monospace;
+  font-size: 16px;
+  padding: 20px;
+}
+
+.RichEditor-controls {
+  font-family: 'Helvetica', sans-serif;
+  font-size: 20px;
+  user-select: none;
+}
+
+.RichEditor-styleButton {
+  color: #999;
+  cursor: pointer;
+  margin-left: 5px;
+  margin-right: 5px;
+  padding: 2px 0;
+  display: inline-block;
+}
+
+.RichEditor-activeButton {
+  color: #5890ff;
+}
+
+p, h1, h2, h3, li {
+  word-wrap: break-word;
+}
+
+.text ul {
+  list-style: disc;
+  margin-top: 16px;
+  margin-bottom: 16px;
+  padding-left: 28px;
+}
+
+.text ol {
+  list-style: decimal;
+  margin-top: 16px;
+  margin-bottom: 16px;
+  padding-left: 21px;
+}
+
+.text ol li {
+  padding-left: 5px;
+}
+
+.text code {
+  background-color: rgba(0, 0, 0, 0.05);
+  font-family: "Inconsolata", "Menlo", "Consolas", "monospace";
+  font-size: 16px;
+  padding: 2px;
+}
+
+.text blockquote {
+  border-left: 5px solid #eee;
+  color: #666;
+  font-family: 'Hoefler Text', 'Georgia', serif;
+  font-style: italic;
+  margin: 16px 0;
+  padding: 10px 20px;
+}
+
+.code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 1em;
+}
+
+h1 {
+  font-size: 36px;
+  margin-bottom:8px;
+}
+
+h2 {
+  font-size: 30px;
+  margin-bottom:8px;
+}
+
+h3 {
+  font-size: 24px;
+  margin-bottom:8px;
+}

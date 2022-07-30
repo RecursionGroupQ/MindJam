@@ -1,6 +1,7 @@
 import React, { createContext, useState, useMemo, useEffect } from "react";
 import Konva from "konva";
 import { nanoid } from "nanoid";
+import { ContentState, convertToRaw, RawDraftContentState } from "draft-js";
 
 export const fills = ["#6B7280", "#EF4444", "#F59E0B", "#10B981", "#3B82F6", "#6366F1", "#8B5CF6", "#EC4899"];
 
@@ -17,7 +18,7 @@ const generateNodes = () => {
       id,
       children: [],
       parents: [],
-      text: `node-${id}`,
+      text: convertToRaw(ContentState.createFromText(`node-${id}`)),
       shapeType: "rect" as ShapeType,
       x: Math.random() * CANVAS_WIDTH,
       y: Math.random() * CANVAS_HEIGHT,
@@ -38,7 +39,7 @@ export type Node = {
   id: string;
   children: string[];
   parents: string[];
-  text: string;
+  text: RawDraftContentState;
   shapeType: ShapeType;
   x: number;
   y: number;
@@ -48,7 +49,7 @@ export type Node = {
   strokeStyle: string;
 };
 
-type StageConfig = {
+export type StageConfig = {
   stageScale: number;
   stageX: number;
   stageY: number;

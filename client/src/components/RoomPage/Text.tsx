@@ -1,11 +1,9 @@
-import React, { useContext, useState, useRef, useEffect } from "react";
-import { Editor } from "react-draft-wysiwyg";
+import React, { useContext, useRef, useEffect, useState } from "react";
 import { Html } from "react-konva-utils";
-import { EditorState, ContentState, convertToRaw } from "draft-js";
+import { EditorState, convertFromRaw, convertToRaw } from "draft-js";
 import draftToHtml from "draftjs-to-html";
-import htmlToDraft from "html-to-draftjs";
 import { RoomContext, Node } from "../../context/RoomContext";
-import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
+import Editor from "./Editor";
 
 type Props = {
   node: Node;
@@ -14,9 +12,15 @@ type Props = {
 };
 
 const Text: React.FC<Props> = ({ node, isEditing, onToggleEdit }) => {
+  const contentState = convertFromRaw(node.text);
+  const [editorState, setEditorState] = useState<EditorState>(EditorState.createWithContent(contentState));
   const { stageConfig, stageRef, setNodes } = useContext(RoomContext);
-  const [text, setText] = useState<string>(node.text);
   const textRef = useRef<HTMLDivElement | null>(null);
+  const htmlString = draftToHtml(convertToRaw(editorState.getCurrentContent()))
+    .replaceAll(/<p><\/p>/g, "<br>")
+    .replaceAll(/<h1><\/h1>/g, "<br>")
+    .replaceAll(/<h2><\/h2>/g, "<br>")
+    .replaceAll(/<h3><\/h3>/g, "<br>");
 
   useEffect(() => {
     if (stageRef && stageRef.current && !isEditing) {
@@ -31,78 +35,69 @@ const Text: React.FC<Props> = ({ node, isEditing, onToggleEdit }) => {
     }
   }, [stageRef, isEditing]);
 
-  const handleOnBlur = () => {
-    onToggleEdit();
-    setNodes((prevState) => {
-      const currNode = prevState.get(node.id);
-      if (!currNode) return prevState;
-      return new Map(
-        prevState.set(node.id, {
-          ...currNode,
-          text,
-        })
-      );
-    });
-  };
+  // ノードとテキストの位置を調整
+  let x: number;
+  if (node.shapeType === "rect") x = 0;
+  else if (node.shapeType === "ellipse") x = -node.width / 4;
+  else x = -node.width / 10;
 
-  const onEditorStateChange = (editorState: EditorState) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-    const html: string = draftToHtml(convertToRaw(editorState.getCurrentContent())).replaceAll(/<p><\/p>/g, "<br/>");
-    setText(html);
-  };
+  let y: number;
+  if (node.shapeType === "rect") y = 0;
+  else if (node.shapeType === "ellipse") y = -node.height / 4;
+  else y = -node.height / 4;
 
-  const contentBlocks = htmlToDraft(text);
-  const contentState = ContentState.createFromBlockArray(contentBlocks.contentBlocks, contentBlocks.entityMap);
+  let width: number;
+  if (node.shapeType === "rect") width = node.width;
+  else if (node.shapeType === "ellipse") width = node.width / 2;
+  else width = node.width / 5;
+
+  let height: number;
+  if (node.shapeType === "rect") height = node.height;
+  else if (node.shapeType === "ellipse") height = node.height / 2;
+  else height = node.height / 2;
 
   return (
     <>
       {isEditing && (
         <Html
           groupProps={{
-            x: 0,
-            y: 0,
+            x,
+            y,
             width: node.width,
             height: node.height,
           }}
           divProps={{ style: { opacity: 1 } }}
         >
-          <Editor
-            defaultEditorState={EditorState.createWithContent(contentState)}
-            toolbarOnFocus
-            toolbarStyle={{
-              position: "absolute",
-              top: -50 * (1 / stageConfig.stageScale),
-              left: -250 + node.width / 2,
-              right: 0,
-              width: 500,
-              zIndex: 20,
-              transform: `scale(${1 / stageConfig.stageScale})`,
-            }}
-            editorStyle={{ width: node.width, height: node.height }}
-            toolbar={{
-              options: ["inline", "blockType", "fontSize", "list", "textAlign", "colorPicker", "link", "history"],
-              inline: { inDropdown: true },
-              list: { inDropdown: true },
-              textAlign: { inDropdown: true },
-              link: { inDropdown: true },
-              history: { inDropdown: true },
-              blockType: { options: ["Normal", "H1", "H2", "H3", "H4", "H5", "H6", "Blockquote", "Code"] },
-            }}
-            localization={{
-              locale: "ja",
-            }}
-            onBlur={handleOnBlur}
-            onEditorStateChange={onEditorStateChange}
-          />
+          <div className="rounded-md sm:text-lg overflow-scroll" style={{ width, height }}>
+            {/* components inside <Html /> may not have access to upper context (so you have to bridge contexts manually) */}
+            <Editor
+              editorState={editorState}
+              setEditorState={setEditorState}
+              node={node}
+              setNodes={setNodes}
+              onToggleEdit={onToggleEdit}
+              stageConfig={stageConfig}
+            />
+          </div>
         </Html>
       )}
       {!isEditing && (
-        <Html divProps={{ style: { opacity: 1 } }}>
+        <Html
+          groupProps={{
+            x,
+            y,
+            width: node.width,
+            height: node.height,
+          }}
+          divProps={{ style: { opacity: 1 } }}
+        >
           <div
             ref={textRef}
+            // テキストのcssのclass
+            className="text"
             style={{
-              width: node.width,
-              height: node.height,
+              width,
+              height,
               overflow: "scroll",
               display: "flex",
               alignItems: "center",
@@ -111,8 +106,12 @@ const Text: React.FC<Props> = ({ node, isEditing, onToggleEdit }) => {
             onDoubleClick={onToggleEdit}
             aria-hidden="true"
           >
-            {/* eslint-disable-next-line react/no-danger */}
-            <div dangerouslySetInnerHTML={{ __html: text }} style={{ width: node.width, height: node.height }} />
+            <div
+              className="p-2 rounded-md sm:text-lg prose prose-stone"
+              // eslint-disable-next-line react/no-danger
+              dangerouslySetInnerHTML={{ __html: htmlString }}
+              style={{ width, height }}
+            />
           </div>
         </Html>
       )}
