@@ -20,7 +20,6 @@ type Props = {
 // Converts inline styles color, background-color, font-size, font-family to a span tag with inline style details: <span style="color:xyz;font-size:xx">.
 // (The inline styles in JSON object should start with strings color or font-size like color-red, color-green or fontsize-12, fontsize-20).
 const colorStyleMap = {
-  // eslint-disable-next-line prettier/prettier
   "color-red": {
     color: "red",
   },
