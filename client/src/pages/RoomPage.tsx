@@ -25,6 +25,9 @@ const RoomPage = () => {
     fillStyle,
     strokeStyle,
     setDisplayColorPicker,
+    history,
+    historyIndex,
+    setHistoryIndex,
   } = useContext(RoomContext);
 
   const [canDragStage, setCanDragStage] = useState(true);
@@ -32,7 +35,16 @@ const RoomPage = () => {
   const selectionRectRef = useRef<Konva.Rect>(null);
   const [selectionRectCoords, setSelectionRectCoords] = useState({ x1: 0, y1: 0 });
   const stageRef = useRef<Konva.Stage>(null);
-  const { addToHistory } = useHistory();
+  const { addToHistory, undoByShortcutKey, redoByShortcutKey } = useHistory();
+
+  useEffect(() => {
+    document.addEventListener("keydown", undoByShortcutKey);
+    document.addEventListener("keydown", redoByShortcutKey);
+    return () => {
+      document.removeEventListener("keydown", undoByShortcutKey);
+      document.removeEventListener("keydown", redoByShortcutKey);
+    };
+  }, [historyIndex, history, setHistoryIndex, setNodes, undoByShortcutKey, redoByShortcutKey]);
 
   useEffect(() => {
     if (stageRef.current) {
