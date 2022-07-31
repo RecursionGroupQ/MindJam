@@ -1,6 +1,6 @@
 import React, { useContext, useRef, useEffect, useState } from "react";
 import { Html } from "react-konva-utils";
-import { EditorState, convertFromRaw, convertToRaw } from "draft-js";
+import { EditorState, convertFromRaw, RawDraftContentState } from "draft-js";
 import draftToHtml from "draftjs-to-html";
 import { RoomContext, Node } from "../../context/RoomContext";
 import Editor from "./Editor";
@@ -13,11 +13,11 @@ type Props = {
 };
 
 const Text: React.FC<Props> = ({ node, isEditing, onToggleEdit }) => {
-  const contentState = convertFromRaw(node.text);
+  const contentState = convertFromRaw(JSON.parse(node.text) as RawDraftContentState);
   const [editorState, setEditorState] = useState<EditorState>(EditorState.createWithContent(contentState));
   const { stageConfig, stageRef, setNodes } = useContext(RoomContext);
   const textRef = useRef<HTMLDivElement | null>(null);
-  const htmlString = draftToHtml(convertToRaw(editorState.getCurrentContent()))
+  const htmlString = draftToHtml(JSON.parse(node.text) as RawDraftContentState)
     .replaceAll(/<p><\/p>/g, "<br>")
     .replaceAll(/<h1><\/h1>/g, "<br>")
     .replaceAll(/<h2><\/h2>/g, "<br>")
@@ -36,22 +36,8 @@ const Text: React.FC<Props> = ({ node, isEditing, onToggleEdit }) => {
       }
     }
   }, [stageRef, isEditing]);
-  
-  const handleOnBlur = () => {
-    onToggleEdit();
-    setNodes((prevState) => {
-      const currNode = prevState.get(node.id);
-      if (!currNode) return prevState;
-      prevState.set(node.id, {
-        ...currNode,
-        text,
-      });
-      addToHistory(prevState);
-      return new Map(prevState);
-    });
-  };
-  
-    // ノードとテキストの位置を調整
+
+  // ノードとテキストの位置を調整
   let x: number;
   if (node.shapeType === "rect") x = 0;
   else if (node.shapeType === "ellipse") x = -node.width / 4;
@@ -71,9 +57,6 @@ const Text: React.FC<Props> = ({ node, isEditing, onToggleEdit }) => {
   if (node.shapeType === "rect") height = node.height;
   else if (node.shapeType === "ellipse") height = node.height / 2;
   else height = node.height / 2;
-
-  const contentBlocks = htmlToDraft(node.text);
-  const contentState = ContentState.createFromBlockArray(contentBlocks.contentBlocks, contentBlocks.entityMap);
 
   return (
     <>
@@ -96,6 +79,7 @@ const Text: React.FC<Props> = ({ node, isEditing, onToggleEdit }) => {
               setNodes={setNodes}
               onToggleEdit={onToggleEdit}
               stageConfig={stageConfig}
+              addToHistory={addToHistory}
             />
           </div>
         </Html>

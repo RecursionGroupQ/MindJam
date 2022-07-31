@@ -14,6 +14,7 @@ type Props = {
   editorState: EditorState;
   setEditorState: (editorState: EditorState) => void;
   stageConfig: StageConfig;
+  addToHistory: (updatedNodes: Map<string, Node>) => void;
 };
 
 // according to draft to html doc
@@ -96,7 +97,15 @@ const getBlockStyle = (contentBlock: ContentBlock) => {
   return "";
 };
 
-const Editor: React.FC<Props> = ({ editorState, setEditorState, node, setNodes, onToggleEdit, stageConfig }) => {
+const Editor: React.FC<Props> = ({
+  editorState,
+  setEditorState,
+  node,
+  setNodes,
+  onToggleEdit,
+  stageConfig,
+  addToHistory,
+}) => {
   const editorRef = useRef<DraftEditor>(null);
 
   useEffect(() => {
@@ -175,16 +184,19 @@ const Editor: React.FC<Props> = ({ editorState, setEditorState, node, setNodes, 
 
   const handleOnBlur = () => {
     onToggleEdit();
-    const content = convertToRaw(editorState.getCurrentContent());
+    const content = JSON.stringify(convertToRaw(editorState.getCurrentContent()));
     setNodes((prevState) => {
       const currNode = prevState.get(node.id);
       if (!currNode) return prevState;
-      return new Map(
+      const prevText = prevState.get(node.id)?.text;
+      if (prevText && prevText !== content) {
         prevState.set(node.id, {
           ...currNode,
           text: content,
-        })
-      );
+        });
+        addToHistory(prevState);
+      }
+      return new Map(prevState);
     });
   };
 
