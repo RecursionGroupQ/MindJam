@@ -25,18 +25,18 @@ const ToolBox = () => {
   const handleUndo = () => {
     if (historyIndex > 0) {
       const prevIndex: number = historyIndex - 1;
-      const newHistory = new Map(history[prevIndex]);
-      setNodes(newHistory);
+      const prevHistory = new Map(history[prevIndex]);
+      setNodes(prevHistory);
       setHistoryIndex(prevIndex);
     }
   };
 
   const handleRedo = () => {
     if (history.length - 1 > historyIndex) {
-      const frontIndex: number = historyIndex + 1;
-      const newHistory = new Map(history[frontIndex]);
-      setNodes(newHistory);
-      setHistoryIndex(frontIndex);
+      const nextIndex: number = historyIndex + 1;
+      const nextHistory = new Map(history[nextIndex]);
+      setNodes(nextHistory);
+      setHistoryIndex(nextIndex);
     }
   };
 
