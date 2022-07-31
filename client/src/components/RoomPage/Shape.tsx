@@ -17,7 +17,6 @@ const Shape: React.FC<Props> = ({ node }) => {
   const shapeRef = useRef<Konva.Group>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const { addToHistory } = useHistory();
-
   useEffect(() => {
     // add node.id as attribute to ref of shape
     shapeRef.current?.setAttr("id", node.id);

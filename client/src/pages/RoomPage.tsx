@@ -2,8 +2,8 @@ import React, { useContext, useRef, useEffect, useState } from "react";
 import { Stage, Layer, Transformer, Rect } from "react-konva";
 import Konva from "konva";
 import { nanoid } from "nanoid";
+import { ContentState, convertToRaw } from "draft-js";
 import { motion } from "framer-motion";
-
 import { Node, RoomContext, CANVAS_WIDTH, CANVAS_HEIGHT } from "../context/RoomContext";
 import Edge from "../components/RoomPage/Edge";
 import Shape from "../components/RoomPage/Shape";
@@ -94,7 +94,8 @@ const RoomPage = () => {
           id,
           children: [],
           parents: [],
-          text: `node-${id}`,
+          // text: convertToRaw(ContentState.createFromText(`node-${id}`)),
+          text: JSON.stringify(convertToRaw(ContentState.createFromText(`node-${id}`))),
           shapeType,
           x: pointerPosition.x,
           y: pointerPosition.y,
