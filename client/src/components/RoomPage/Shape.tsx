@@ -5,6 +5,7 @@ import { RoomContext, Node } from "../../context/RoomContext";
 import RectShape from "./ShapeComponent/RectShape";
 import EllipseShape from "./ShapeComponent/EllipseShape";
 import StarShape from "./ShapeComponent/StarShape";
+import useHistory from "../../hooks/useHistory";
 import Text from "./Text";
 
 type Props = {
@@ -15,6 +16,7 @@ const Shape: React.FC<Props> = ({ node }) => {
   const { nodes, setNodes, selectedNode, setSelectedNode, selectedShapes, setSelectedShapes } = useContext(RoomContext);
   const shapeRef = useRef<Konva.Group>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const { addToHistory } = useHistory();
   useEffect(() => {
     // add node.id as attribute to ref of shape
     shapeRef.current?.setAttr("id", node.id);
@@ -32,6 +34,21 @@ const Shape: React.FC<Props> = ({ node }) => {
           y,
         })
       );
+    });
+  };
+
+  const handleDragEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
+    setNodes((prevState) => {
+      const { x, y } = e.target.position();
+      const currNode = prevState.get(node.id);
+      if (!currNode) return prevState;
+      prevState.set(node.id, {
+        ...currNode,
+        x,
+        y,
+      });
+      addToHistory(prevState);
+      return new Map(prevState);
     });
   };
 
@@ -66,6 +83,7 @@ const Shape: React.FC<Props> = ({ node }) => {
           });
           return new Map(prevState);
         }
+        addToHistory(prevState);
         return prevState;
       });
       setSelectedNode(null);
@@ -104,13 +122,13 @@ const Shape: React.FC<Props> = ({ node }) => {
       setNodes((prevState) => {
         const currNode = nodes.get(node.id);
         if (!currNode) return prevState;
-        return new Map(
-          prevState.set(node.id, {
-            ...currNode,
-            width: node.width * scaleX,
-            height: node.height * scaleY,
-          })
-        );
+        prevState.set(node.id, {
+          ...currNode,
+          width: node.width * scaleX,
+          height: node.height * scaleY,
+        });
+        addToHistory(prevState);
+        return new Map(prevState);
       });
     }
   };
@@ -128,6 +146,7 @@ const Shape: React.FC<Props> = ({ node }) => {
       offsetY={node.shapeType === "rect" ? node.height / 2 : 0}
       draggable
       onDragMove={handleDragMove}
+      onDragEnd={handleDragEnd}
       onClick={handleClick}
       onTap={handleClick}
       onTransform={handleTransform}

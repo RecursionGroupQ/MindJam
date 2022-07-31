@@ -3,10 +3,12 @@ import { Stage, Layer, Transformer, Rect } from "react-konva";
 import Konva from "konva";
 import { nanoid } from "nanoid";
 import { ContentState, convertToRaw } from "draft-js";
+import { motion } from "framer-motion";
 import { Node, RoomContext, CANVAS_WIDTH, CANVAS_HEIGHT } from "../context/RoomContext";
 import Edge from "../components/RoomPage/Edge";
 import Shape from "../components/RoomPage/Shape";
 import ToolBox from "../components/RoomPage/ToolBox/ToolBox";
+import useHistory from "../hooks/useHistory";
 
 const RoomPage = () => {
   const {
@@ -24,6 +26,9 @@ const RoomPage = () => {
     fillStyle,
     strokeStyle,
     setDisplayColorPicker,
+    history,
+    historyIndex,
+    setHistoryIndex,
   } = useContext(RoomContext);
 
   const [canDragStage, setCanDragStage] = useState(true);
@@ -31,6 +36,16 @@ const RoomPage = () => {
   const selectionRectRef = useRef<Konva.Rect>(null);
   const [selectionRectCoords, setSelectionRectCoords] = useState({ x1: 0, y1: 0 });
   const stageRef = useRef<Konva.Stage>(null);
+  const { addToHistory, undoByShortcutKey, redoByShortcutKey } = useHistory();
+
+  useEffect(() => {
+    document.addEventListener("keydown", undoByShortcutKey);
+    document.addEventListener("keydown", redoByShortcutKey);
+    return () => {
+      document.removeEventListener("keydown", undoByShortcutKey);
+      document.removeEventListener("keydown", redoByShortcutKey);
+    };
+  }, [historyIndex, history, setHistoryIndex, setNodes, undoByShortcutKey, redoByShortcutKey]);
 
   useEffect(() => {
     if (stageRef.current) {
@@ -88,7 +103,13 @@ const RoomPage = () => {
           fillStyle,
           strokeStyle,
         };
-        setNodes((prevState) => new Map(prevState.set(id, newNode)));
+        setNodes((prevState) => {
+          prevState.set(newNode.id, newNode);
+          addToHistory(prevState);
+          return new Map(prevState);
+        });
+        // addHistoryByDoubleClick(newNode);
+        // addHistory();
       }
     }
   };
@@ -132,6 +153,13 @@ const RoomPage = () => {
     }
   };
 
+  const handleDragStart = (e: Konva.KonvaEventObject<DragEvent>) => {
+    if (e.target === stageRef.current && canDragStage) {
+      const container = stageRef.current.container();
+      if (container) container.style.cursor = "grabbing";
+    }
+  };
+
   // マウスドラッグで Canvas 内を移動
   const handleDragMove = (e: Konva.KonvaEventObject<DragEvent>) => {
     if (e.target === stageRef.current && canDragStage) {
@@ -139,6 +167,13 @@ const RoomPage = () => {
         ...prevState,
         backgroundPosition: `${e.target.x()}px ${e.target.y()}px`,
       }));
+    }
+  };
+
+  const handleDragEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
+    if (e.target === stageRef.current && canDragStage) {
+      const container = stageRef.current.container();
+      if (container) container.style.cursor = "auto";
     }
   };
 
@@ -210,7 +245,13 @@ const RoomPage = () => {
 
   return (
     <>
-      <ToolBox />
+      <motion.div
+        initial={{ y: CANVAS_HEIGHT + 200, scale: 0 }}
+        animate={{ y: CANVAS_HEIGHT - 50, scale: 1 }}
+        transition={{ duration: 0.8 }}
+      >
+        <ToolBox />
+      </motion.div>
       <RoomContext.Consumer>
         {(value) => (
           <Stage
@@ -224,21 +265,26 @@ const RoomPage = () => {
             width={CANVAS_WIDTH}
             height={CANVAS_HEIGHT}
             draggable={canDragStage}
+            onDragStart={handleDragStart}
             onDragMove={handleDragMove}
+            onDragEnd={handleDragEnd}
             onClick={handleClick}
             onTap={handleClick}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onDblClick={handleDoubleClick}
-            onDblTap={handleDoubleClick}
+            // onDblTap={handleDoubleClick}
             onWheel={handleWheel}
           >
             <RoomContext.Provider value={value}>
               <Layer>
-                {Array.from(nodes.keys()).map((key) => (
-                  <Edge key={key} node={nodes.get(key) as Node} />
-                ))}
+                {Array.from(nodes.keys()).map((key) => {
+                  const currNode = nodes.get(key) as Node;
+                  return currNode.children.map((childId) => (
+                    <Edge key={`edge_${currNode.id}_${childId}`} node={currNode} childId={childId} />
+                  ));
+                })}
                 {Array.from(nodes.keys()).map((key) => (
                   <Shape key={key} node={nodes.get(key) as Node} />
                 ))}

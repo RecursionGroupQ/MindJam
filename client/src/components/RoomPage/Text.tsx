@@ -4,6 +4,7 @@ import { EditorState, convertFromRaw, convertToRaw } from "draft-js";
 import draftToHtml from "draftjs-to-html";
 import { RoomContext, Node } from "../../context/RoomContext";
 import Editor from "./Editor";
+import useHistory from "../../hooks/useHistory";
 
 type Props = {
   node: Node;
@@ -21,6 +22,7 @@ const Text: React.FC<Props> = ({ node, isEditing, onToggleEdit }) => {
     .replaceAll(/<h1><\/h1>/g, "<br>")
     .replaceAll(/<h2><\/h2>/g, "<br>")
     .replaceAll(/<h3><\/h3>/g, "<br>");
+  const { addToHistory } = useHistory();
 
   useEffect(() => {
     if (stageRef && stageRef.current && !isEditing) {
@@ -34,8 +36,22 @@ const Text: React.FC<Props> = ({ node, isEditing, onToggleEdit }) => {
       }
     }
   }, [stageRef, isEditing]);
-
-  // ノードとテキストの位置を調整
+  
+  const handleOnBlur = () => {
+    onToggleEdit();
+    setNodes((prevState) => {
+      const currNode = prevState.get(node.id);
+      if (!currNode) return prevState;
+      prevState.set(node.id, {
+        ...currNode,
+        text,
+      });
+      addToHistory(prevState);
+      return new Map(prevState);
+    });
+  };
+  
+    // ノードとテキストの位置を調整
   let x: number;
   if (node.shapeType === "rect") x = 0;
   else if (node.shapeType === "ellipse") x = -node.width / 4;
@@ -55,6 +71,9 @@ const Text: React.FC<Props> = ({ node, isEditing, onToggleEdit }) => {
   if (node.shapeType === "rect") height = node.height;
   else if (node.shapeType === "ellipse") height = node.height / 2;
   else height = node.height / 2;
+
+  const contentBlocks = htmlToDraft(node.text);
+  const contentState = ContentState.createFromBlockArray(contentBlocks.contentBlocks, contentBlocks.entityMap);
 
   return (
     <>
