@@ -32,11 +32,8 @@ const Header = () => {
           <span className="ml-3 text-xl">Mindmap</span>
         </Link>
         <nav className="md:mr-auto md:ml-4 md:py-1 md:pl-4 md:border-l md:border-gray-400	flex flex-wrap items-center text-base justify-center">
-          <Link to="/" className="mr-5 hover:text-gray-900">
-            Home
-          </Link>
-          <Link to="/room" className="mr-5 hover:text-gray-900">
-            Room
+          <Link to="/dashboard" className="mr-5 hover:text-gray-900">
+            Dashboard
           </Link>
         </nav>
         <FontAwesomeIcon

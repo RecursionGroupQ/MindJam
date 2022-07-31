@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import { Editor as DraftEditor, convertToRaw, RichUtils, ContentBlock, EditorState, Modifier } from "draft-js";
-import { Node, StageConfig } from "../../context/RoomContext";
+import { History, Node, StageConfig } from "../../context/RoomContext";
 import InlineStyleControls from "./Editor/InlineStyleControls";
 import BlockStyleControls from "./Editor/BlockStyleControls";
 import "draft-js/dist/Draft.css";
@@ -14,7 +14,8 @@ type Props = {
   editorState: EditorState;
   setEditorState: (editorState: EditorState) => void;
   stageConfig: StageConfig;
-  addToHistory: (updatedNodes: Map<string, Node>) => void;
+  addToHistory: ({ type, diff, nodes: updatedNodes }: History) => void;
+  saveUpdatedNodes: (nodesToUpdate: Node[]) => Promise<void>;
 };
 
 // according to draft to html doc
@@ -105,6 +106,7 @@ const Editor: React.FC<Props> = ({
   onToggleEdit,
   stageConfig,
   addToHistory,
+  saveUpdatedNodes,
 }) => {
   const editorRef = useRef<DraftEditor>(null);
 
@@ -190,11 +192,17 @@ const Editor: React.FC<Props> = ({
       if (!currNode) return prevState;
       const prevText = prevState.get(node.id)?.text;
       if (prevText && prevText !== content) {
-        prevState.set(node.id, {
+        const updatedNode = {
           ...currNode,
           text: content,
+        };
+        prevState.set(node.id, updatedNode);
+        saveUpdatedNodes([updatedNode]).catch((err) => console.log(err));
+        addToHistory({
+          type: "update",
+          diff: null,
+          nodes: prevState,
         });
-        addToHistory(prevState);
       }
       return new Map(prevState);
     });

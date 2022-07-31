@@ -2,6 +2,8 @@ import React, { useContext } from "react";
 
 import { Popover, PopoverContent, PopoverHandler } from "@material-tailwind/react";
 
+import { motion } from "framer-motion";
+
 import { AiOutlineStar } from "react-icons/ai";
 import { BiRectangle } from "react-icons/bi";
 import { IoEllipseOutline } from "react-icons/io5";
@@ -46,24 +48,15 @@ const NodeShapePanel = () => {
       )}
       <PopoverContent>
         <div className="flex mb-10">
-          <BiRectangle
-            size={40}
-            color="black"
-            onClick={() => handleChangeOfShape("rect")}
-            className="hover:bg-grey-300"
-          />
-          <IoEllipseOutline
-            size={40}
-            color="black"
-            onClick={() => handleChangeOfShape("ellipse")}
-            className="hover:bg-grey-300"
-          />
-          <AiOutlineStar
-            size={40}
-            color="black"
-            onClick={() => handleChangeOfShape("star")}
-            className="hover:bg-grey-300"
-          />
+          <motion.div whileHover={{ scale: [null, 1.5, 1.3] }} transition={{ duration: 0.3 }}>
+            <BiRectangle size={40} color="black" onClick={() => handleChangeOfShape("rect")} />
+          </motion.div>
+          <motion.div whileHover={{ scale: [null, 1.5, 1.3] }} transition={{ duration: 0.3 }}>
+            <IoEllipseOutline size={40} color="black" onClick={() => handleChangeOfShape("ellipse")} />
+          </motion.div>
+          <motion.div whileHover={{ scale: [null, 1.5, 1.3] }} transition={{ duration: 0.3 }}>
+            <AiOutlineStar size={40} color="black" onClick={() => handleChangeOfShape("star")} />
+          </motion.div>
         </div>
       </PopoverContent>
     </Popover>

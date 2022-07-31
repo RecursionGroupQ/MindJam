@@ -2,6 +2,8 @@ import React, { useContext, useState } from "react";
 import { Group, Image, Shape } from "react-konva";
 import useImage from "use-image";
 import { RoomContext, Node } from "../../context/RoomContext";
+import useSaveRoom from "../../hooks/firebase/useSaveRoom";
+import useHistory from "../../hooks/useHistory";
 
 type Props = {
   node: Node;
@@ -18,6 +20,8 @@ const Edge: React.FC<Props> = ({ node, childId }) => {
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [buttonHover, setButtonHover] = useState(false);
   const [edgeDeleteBtn] = useImage(IMG_URL);
+  const { addToHistory } = useHistory();
+  const { saveUpdatedNodes } = useSaveRoom();
 
   const handleClick = () => {
     // delete edge
@@ -27,14 +31,22 @@ const Edge: React.FC<Props> = ({ node, childId }) => {
       const childNode = nodes.get(childId);
 
       if (currNode && childNode) {
-        updatedNodes.set(currNode.id, {
+        const updatedCurrNode = {
           ...currNode,
           children: currNode.children.filter((child) => child !== childId),
-        });
-        updatedNodes.set(childNode.id, {
+        };
+        updatedNodes.set(currNode.id, updatedCurrNode);
+        const updatedChildNode = {
           ...childNode,
           parents: childNode.parents.filter((parent) => parent !== currNode.id),
+        };
+        updatedNodes.set(childNode.id, updatedChildNode);
+        addToHistory({
+          type: "update",
+          diff: null,
+          nodes: updatedNodes,
         });
+        saveUpdatedNodes([updatedCurrNode, updatedChildNode]).catch((err) => console.log(err));
       }
       return updatedNodes;
     });
