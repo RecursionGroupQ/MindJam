@@ -32,7 +32,7 @@ const NodeColor: React.FC<Props> = ({ value }) => {
 
   return (
     <>
-      <div className="grid grid-cols-7">
+      <div className="mb-5 grid grid-cols-7 float-left">
         {colorData.map((color) => (
           <div key={color} className="py-3 px-1">
             <ColorButton color={color} value={value} />
@@ -41,7 +41,7 @@ const NodeColor: React.FC<Props> = ({ value }) => {
         <ColorPickerButton />
         {value === "line" ? null : <EmptyColorButton value={value} />}
       </div>
-      {displayColorPicker ? <ColorPicker value={value} /> : null}
+      <div className="inline-block ml-5">{displayColorPicker ? <ColorPicker value={value} /> : null}</div>
     </>
   );
 };

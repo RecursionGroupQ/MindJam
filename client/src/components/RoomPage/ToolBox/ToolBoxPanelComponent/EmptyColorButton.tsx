@@ -1,5 +1,7 @@
 import React from "react";
 
+import { motion } from "framer-motion";
+
 import { FiSlash } from "react-icons/fi";
 
 import useChangeNodeStyle from "../../../../hooks/useChangeNodeStyle";
@@ -15,9 +17,11 @@ const EmptyColorButton: React.FC<Props> = ({ value }) => {
     changeNodeColors("#ffffff00", value);
   };
   return (
-    <button type="button" onClick={emptyTheFill}>
-      <FiSlash size={40} color="black" />
-    </button>
+    <motion.div whileHover={{ scale: [null, 1.5, 1.3] }} transition={{ duration: 0.3 }}>
+      <button type="button" onClick={emptyTheFill}>
+        <FiSlash size={40} color="black" />
+      </button>
+    </motion.div>
   );
 };
 
