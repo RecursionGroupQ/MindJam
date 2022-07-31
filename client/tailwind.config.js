@@ -6,6 +6,7 @@ module.exports = withMT({
     extend: {
       zIndex: {
         "-10": "-10",
+        "-9": "-9",
       },
     },
   },

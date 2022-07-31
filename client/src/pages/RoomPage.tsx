@@ -3,12 +3,16 @@ import { Stage, Layer, Transformer, Rect } from "react-konva";
 import Konva from "konva";
 import { nanoid } from "nanoid";
 import { ContentState, convertToRaw } from "draft-js";
-import { motion } from "framer-motion";
+import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import { Oval } from "react-loader-spinner";
 import { Node, RoomContext, CANVAS_WIDTH, CANVAS_HEIGHT } from "../context/RoomContext";
 import Edge from "../components/RoomPage/Edge";
 import Shape from "../components/RoomPage/Shape";
 import ToolBox from "../components/RoomPage/ToolBox/ToolBox";
 import useHistory from "../hooks/useHistory";
+import useGetRoom from "../hooks/firebase/useGetRoom";
+import useSaveRoom from "../hooks/firebase/useSaveRoom";
 
 const RoomPage = () => {
   const {
@@ -29,6 +33,8 @@ const RoomPage = () => {
     history,
     historyIndex,
     setHistoryIndex,
+    setRoomId,
+    roomId,
   } = useContext(RoomContext);
 
   const [canDragStage, setCanDragStage] = useState(true);
@@ -37,6 +43,24 @@ const RoomPage = () => {
   const [selectionRectCoords, setSelectionRectCoords] = useState({ x1: 0, y1: 0 });
   const stageRef = useRef<Konva.Stage>(null);
   const { addToHistory, undoByShortcutKey, redoByShortcutKey } = useHistory();
+  const { id: ROOM_ID } = useParams();
+  const { getRoom, isLoading } = useGetRoom();
+  const { saveUpdatedNodes } = useSaveRoom();
+
+  // set room id
+  useEffect(() => {
+    setRoomId(ROOM_ID);
+    return () => {
+      setRoomId(undefined);
+    };
+  }, [ROOM_ID, setRoomId]);
+
+  // get room data
+  useEffect(() => {
+    if (roomId) {
+      getRoom(roomId).catch((err) => toast.error((err as Error).message));
+    }
+  }, [getRoom, roomId]);
 
   useEffect(() => {
     document.addEventListener("keydown", undoByShortcutKey);
@@ -94,7 +118,6 @@ const RoomPage = () => {
           id,
           children: [],
           parents: [],
-          // text: convertToRaw(ContentState.createFromText(`node-${id}`)),
           text: JSON.stringify(convertToRaw(ContentState.createFromText(`node-${id}`))),
           shapeType,
           x: pointerPosition.x,
@@ -106,11 +129,14 @@ const RoomPage = () => {
         };
         setNodes((prevState) => {
           prevState.set(newNode.id, newNode);
-          addToHistory(prevState);
+          addToHistory({
+            type: "add",
+            diff: [newNode.id],
+            nodes: prevState,
+          });
           return new Map(prevState);
         });
-        // addHistoryByDoubleClick(newNode);
-        // addHistory();
+        saveUpdatedNodes([newNode]).catch((err) => console.log(err));
       }
     }
   };
@@ -246,13 +272,14 @@ const RoomPage = () => {
 
   return (
     <>
-      <motion.div
-        initial={{ y: CANVAS_HEIGHT + 200, scale: 0 }}
-        animate={{ y: CANVAS_HEIGHT - 50, scale: 1 }}
-        transition={{ duration: 0.8 }}
-      >
-        <ToolBox />
-      </motion.div>
+      {isLoading && (
+        <div className="absolute top-0 left-0 w-screen h-screen bg-transparent -z-9">
+          <div className="absolute top-1/2 left-1/2" style={{ transform: "translate(-50%, -50%)" }}>
+            <Oval color="#6366f1" secondaryColor="#fff" width={50} height={50} />
+          </div>
+        </div>
+      )}
+      {!isLoading && <ToolBox />}
       <RoomContext.Consumer>
         {(value) => (
           <Stage
@@ -280,32 +307,36 @@ const RoomPage = () => {
           >
             <RoomContext.Provider value={value}>
               <Layer>
-                {Array.from(nodes.keys()).map((key) => {
-                  const currNode = nodes.get(key) as Node;
-                  return currNode.children.map((childId) => (
-                    <Edge key={`edge_${currNode.id}_${childId}`} node={currNode} childId={childId} />
-                  ));
-                })}
-                {Array.from(nodes.keys()).map((key) => (
-                  <Shape key={key} node={nodes.get(key) as Node} />
-                ))}
-                {selectedShapes && (
-                  <Transformer
-                    ref={transformerRef}
-                    rotateEnabled={false}
-                    anchorSize={15}
-                    anchorStrokeWidth={3}
-                    anchorCornerRadius={100}
-                    flipEnabled={false}
-                    boundBoxFunc={(oldBox, newBox) => {
-                      if (newBox.width > 800) {
-                        return oldBox;
-                      }
-                      return newBox;
-                    }}
-                  />
+                {!isLoading && (
+                  <>
+                    {Array.from(nodes.keys()).map((key) => {
+                      const currNode = nodes.get(key) as Node;
+                      return currNode.children.map((childId) => (
+                        <Edge key={`edge_${currNode.id}_${childId}`} node={currNode} childId={childId} />
+                      ));
+                    })}
+                    {Array.from(nodes.keys()).map((key) => (
+                      <Shape key={key} node={nodes.get(key) as Node} />
+                    ))}
+                    {selectedShapes && (
+                      <Transformer
+                        ref={transformerRef}
+                        rotateEnabled={false}
+                        anchorSize={15}
+                        anchorStrokeWidth={3}
+                        anchorCornerRadius={100}
+                        flipEnabled={false}
+                        boundBoxFunc={(oldBox, newBox) => {
+                          if (newBox.width > 800) {
+                            return oldBox;
+                          }
+                          return newBox;
+                        }}
+                      />
+                    )}
+                    <Rect ref={selectionRectRef} fill="rgba(99,102,241,0.2)" visible={false} />
+                  </>
                 )}
-                <Rect ref={selectionRectRef} fill="rgba(99,102,241,0.2)" visible={false} />
               </Layer>
             </RoomContext.Provider>
           </Stage>

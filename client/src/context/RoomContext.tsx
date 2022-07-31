@@ -1,7 +1,5 @@
 import React, { createContext, useState, useMemo, useEffect } from "react";
 import Konva from "konva";
-import { nanoid } from "nanoid";
-import { ContentState, convertToRaw } from "draft-js";
 
 export const fills = ["#6B7280", "#EF4444", "#F59E0B", "#10B981", "#3B82F6", "#6366F1", "#8B5CF6", "#EC4899"];
 
@@ -9,27 +7,6 @@ export const CANVAS_WIDTH = window.innerWidth;
 export const CANVAS_HEIGHT = window.innerHeight;
 
 export type ShapeType = "rect" | "ellipse" | "star";
-
-const generateNodes = () => {
-  const nodes = new Map<string, Node>();
-  for (let i = 0; i < 4; i += 1) {
-    const id = nanoid();
-    nodes.set(id, {
-      id,
-      children: [],
-      parents: [],
-      text: JSON.stringify(convertToRaw(ContentState.createFromText(`node-${id}`))),
-      shapeType: "rect" as ShapeType,
-      x: Math.random() * CANVAS_WIDTH,
-      y: Math.random() * CANVAS_HEIGHT,
-      width: 380,
-      height: 90,
-      fillStyle: "#fff",
-      strokeStyle: "#000",
-    });
-  }
-  return nodes;
-};
 
 type Props = {
   children: React.ReactNode;
@@ -39,7 +16,6 @@ export type Node = {
   id: string;
   children: string[];
   parents: string[];
-  // text: RawDraftContentState;
   text: string;
   shapeType: ShapeType;
   x: number;
@@ -63,6 +39,8 @@ type StageStyle = {
   backgroundSize: string;
   backgroundPosition: string;
 };
+
+export type History = { type: "update" | "add" | "delete"; diff: null | string[]; nodes: Map<string, Node> };
 
 type IRoomContext = {
   nodes: Map<string, Node>;
@@ -89,16 +67,18 @@ type IRoomContext = {
   setDisplayColorPicker: React.Dispatch<React.SetStateAction<boolean>>;
   dark: boolean;
   setDark: React.Dispatch<React.SetStateAction<boolean>>;
-  history: Map<string, Node>[];
-  setHistory: React.Dispatch<React.SetStateAction<Map<string, Node>[]>>;
+  history: History[];
+  setHistory: React.Dispatch<React.SetStateAction<History[]>>;
   historyIndex: number;
   setHistoryIndex: React.Dispatch<React.SetStateAction<number>>;
+  roomId: string | undefined;
+  setRoomId: React.Dispatch<React.SetStateAction<string | undefined>>;
 };
 export const RoomContext: React.Context<IRoomContext> = createContext({} as IRoomContext);
 
 export const RoomContextProvider: React.FC<Props> = ({ children }) => {
   const [stageRef, setStageRef] = useState<React.RefObject<Konva.Stage> | null>(null);
-  const [nodes, setNodes] = useState<Map<string, Node>>(generateNodes());
+  const [nodes, setNodes] = useState<Map<string, Node>>(new Map());
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [shapeType, setShapeType] = useState<ShapeType>("rect");
   const [fillStyle, setFillStyle] = useState<string>("#00000000");
@@ -119,8 +99,15 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
   });
   const [displayColorPicker, setDisplayColorPicker] = useState(false);
   const [dark, setDark] = useState(false);
-  const [history, setHistory] = useState<Map<string, Node>[]>([new Map(nodes)]);
+  const [history, setHistory] = useState<History[]>([
+    {
+      type: "update",
+      diff: null,
+      nodes: new Map(),
+    },
+  ]);
   const [historyIndex, setHistoryIndex] = useState<number>(0);
+  const [roomId, setRoomId] = useState<string | undefined>();
 
   useEffect(() => {
     if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
@@ -162,6 +149,8 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
       setHistory,
       historyIndex,
       setHistoryIndex,
+      roomId,
+      setRoomId,
     }),
     [
       nodes,
@@ -178,6 +167,7 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
       history,
       historyIndex,
       stageRef,
+      roomId,
     ]
   );
 

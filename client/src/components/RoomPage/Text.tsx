@@ -5,6 +5,7 @@ import draftToHtml from "draftjs-to-html";
 import { RoomContext, Node } from "../../context/RoomContext";
 import Editor from "./Editor";
 import useHistory from "../../hooks/useHistory";
+import useSaveRoom from "../../hooks/firebase/useSaveRoom";
 
 type Props = {
   node: Node;
@@ -23,6 +24,7 @@ const Text: React.FC<Props> = ({ node, isEditing, onToggleEdit }) => {
     .replaceAll(/<h2><\/h2>/g, "<br>")
     .replaceAll(/<h3><\/h3>/g, "<br>");
   const { addToHistory } = useHistory();
+  const { saveUpdatedNodes } = useSaveRoom();
 
   useEffect(() => {
     if (stageRef && stageRef.current && !isEditing) {
@@ -80,6 +82,7 @@ const Text: React.FC<Props> = ({ node, isEditing, onToggleEdit }) => {
               onToggleEdit={onToggleEdit}
               stageConfig={stageConfig}
               addToHistory={addToHistory}
+              saveUpdatedNodes={saveUpdatedNodes}
             />
           </div>
         </Html>

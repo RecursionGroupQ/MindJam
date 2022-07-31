@@ -7,6 +7,7 @@ import EllipseShape from "./ShapeComponent/EllipseShape";
 import StarShape from "./ShapeComponent/StarShape";
 import useHistory from "../../hooks/useHistory";
 import Text from "./Text";
+import useSaveRoom from "../../hooks/firebase/useSaveRoom";
 
 type Props = {
   node: Node;
@@ -17,6 +18,7 @@ const Shape: React.FC<Props> = ({ node }) => {
   const shapeRef = useRef<Konva.Group>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const { addToHistory } = useHistory();
+  const { saveUpdatedNodes } = useSaveRoom();
   useEffect(() => {
     // add node.id as attribute to ref of shape
     shapeRef.current?.setAttr("id", node.id);
@@ -42,12 +44,18 @@ const Shape: React.FC<Props> = ({ node }) => {
       const { x, y } = e.target.position();
       const currNode = prevState.get(node.id);
       if (!currNode) return prevState;
-      prevState.set(node.id, {
+      const updatedNode = {
         ...currNode,
         x,
         y,
+      };
+      prevState.set(node.id, updatedNode);
+      addToHistory({
+        type: "update",
+        diff: null,
+        nodes: prevState,
       });
-      addToHistory(prevState);
+      saveUpdatedNodes([updatedNode]).catch((err) => console.log(err));
       return new Map(prevState);
     });
   };
@@ -73,17 +81,24 @@ const Shape: React.FC<Props> = ({ node }) => {
           !selectNode.children.includes(currNode.id) &&
           selectedNode.id !== currNode.id
         ) {
-          prevState.set(selectedNode.id, {
+          const updatedSelectNode = {
             ...selectNode,
             children: [...selectNode.children, currNode.id],
-          });
-          prevState.set(currNode.id, {
+          };
+          prevState.set(selectedNode.id, updatedSelectNode);
+          const updatedCurrNode = {
             ...currNode,
             parents: [...currNode.parents, selectedNode.id],
+          };
+          prevState.set(currNode.id, updatedCurrNode);
+          addToHistory({
+            type: "update",
+            diff: null,
+            nodes: prevState,
           });
+          saveUpdatedNodes([updatedSelectNode, updatedCurrNode]).catch((err) => console.log(err));
           return new Map(prevState);
         }
-        addToHistory(prevState);
         return prevState;
       });
       setSelectedNode(null);
@@ -122,12 +137,18 @@ const Shape: React.FC<Props> = ({ node }) => {
       setNodes((prevState) => {
         const currNode = nodes.get(node.id);
         if (!currNode) return prevState;
-        prevState.set(node.id, {
+        const updatedNode = {
           ...currNode,
           width: node.width * scaleX,
           height: node.height * scaleY,
+        };
+        prevState.set(node.id, updatedNode);
+        addToHistory({
+          type: "update",
+          diff: null,
+          nodes: prevState,
         });
-        addToHistory(prevState);
+        saveUpdatedNodes([updatedNode]).catch((err) => console.log(err));
         return new Map(prevState);
       });
     }

@@ -1,5 +1,6 @@
 import { useContext } from "react";
-import { RoomContext, ShapeType } from "../context/RoomContext";
+import { Node, RoomContext, ShapeType } from "../context/RoomContext";
+import useSaveRoom from "./firebase/useSaveRoom";
 import useHistory from "./useHistory";
 
 const useChangeNodeStyle = () => {
@@ -7,6 +8,7 @@ const useChangeNodeStyle = () => {
     useContext(RoomContext);
 
   const { addToHistory } = useHistory();
+  const { saveUpdatedNodes } = useSaveRoom();
 
   const changeNodeColors = (color: string, value: "fill" | "stroke" | "line") => {
     if (value === "fill") {
@@ -15,29 +17,31 @@ const useChangeNodeStyle = () => {
         setNodes((prevState) => {
           const currNode = nodes.get(selectedNode.id);
           if (!currNode) return prevState;
-          return new Map(
-            prevState.set(selectedNode.id, {
-              ...currNode,
-              fillStyle: color,
-            })
-          );
+          const updatedNode = {
+            ...currNode,
+            fillStyle: color,
+          };
+          saveUpdatedNodes([updatedNode]).catch((err) => console.log(err));
+          return new Map(prevState.set(selectedNode.id, updatedNode));
         });
-        // addHistory();
       } else if (selectedShapes.length >= 2) {
         setNodes((prevState) => {
+          const updatedNodesToSave: Node[] = [];
           const updatedNodes = new Map(prevState);
           selectedShapes.forEach((shape) => {
             const shapeId = shape.id();
             const currNode = nodes.get(shapeId);
             if (!currNode) return;
-            updatedNodes.set(shapeId, {
+            const updatedNode = {
               ...currNode,
               fillStyle: color,
-            });
+            };
+            updatedNodes.set(shapeId, updatedNode);
+            updatedNodesToSave.push(updatedNode);
           });
+          saveUpdatedNodes(updatedNodesToSave).catch((err) => console.log(err));
           return updatedNodes;
         });
-        // addHistory();
       }
       setFillStyle(color);
     } else if (value === "stroke") {
@@ -45,29 +49,31 @@ const useChangeNodeStyle = () => {
         setNodes((prevState) => {
           const currNode = nodes.get(selectedNode.id);
           if (!currNode) return prevState;
-          return new Map(
-            prevState.set(selectedNode.id, {
-              ...currNode,
-              strokeStyle: color,
-            })
-          );
+          const updatedNode = {
+            ...currNode,
+            strokeStyle: color,
+          };
+          saveUpdatedNodes([updatedNode]).catch((err) => console.log(err));
+          return new Map(prevState.set(selectedNode.id, updatedNode));
         });
-        // addHistory();
       } else if (selectedShapes.length >= 2) {
         setNodes((prevState) => {
+          const updatedNodesToSave: Node[] = [];
           const updatedNodes = new Map(prevState);
           selectedShapes.forEach((shape) => {
             const shapeId = shape.id();
             const currNode = nodes.get(shapeId);
             if (!currNode) return;
-            updatedNodes.set(shapeId, {
+            const updatedNode = {
               ...currNode,
               strokeStyle: color,
-            });
+            };
+            updatedNodes.set(shapeId, updatedNode);
+            updatedNodesToSave.push(updatedNode);
           });
+          saveUpdatedNodes(updatedNodesToSave).catch((err) => console.log(err));
           return updatedNodes;
         });
-        // addHistory();
       }
       setStrokeStyle(color);
     } else if (value === "line") {
@@ -81,26 +87,40 @@ const useChangeNodeStyle = () => {
       setNodes((prevState) => {
         const currNode = nodes.get(selectedNode.id);
         if (!currNode) return prevState;
-        prevState.set(selectedNode.id, {
+        const updatedNode = {
           ...currNode,
           shapeType,
+        };
+        prevState.set(selectedNode.id, updatedNode);
+        saveUpdatedNodes([updatedNode]).catch((err) => console.log(err));
+        addToHistory({
+          type: "update",
+          diff: null,
+          nodes: prevState,
         });
-        addToHistory(prevState);
         return new Map(prevState);
       });
     } else if (selectedShapes.length >= 2) {
       setNodes((prevState) => {
+        const updatedNodesToSave: Node[] = [];
         const updatedNodes = new Map(prevState);
         selectedShapes.forEach((shape) => {
           const shapeId = shape.id();
           const currNode = nodes.get(shapeId);
           if (!currNode) return;
-          updatedNodes.set(shapeId, {
+          const updatedNode = {
             ...currNode,
             shapeType,
-          });
+          };
+          updatedNodes.set(shapeId, updatedNode);
+          updatedNodesToSave.push(updatedNode);
         });
-        addToHistory(updatedNodes);
+        saveUpdatedNodes(updatedNodesToSave).catch((err) => console.log(err));
+        addToHistory({
+          type: "update",
+          diff: null,
+          nodes: updatedNodes,
+        });
         return updatedNodes;
       });
     }

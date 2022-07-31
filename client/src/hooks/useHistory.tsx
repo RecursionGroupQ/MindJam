@@ -1,62 +1,81 @@
 import { useCallback, useContext } from "react";
-import { Node, RoomContext } from "../context/RoomContext";
+import { History, RoomContext } from "../context/RoomContext";
+import useSaveRoom from "./firebase/useSaveRoom";
 
 const useHistory = () => {
   const { setNodes, history, setHistory, historyIndex, setHistoryIndex } = useContext(RoomContext);
+  const { saveUpdatedNodes, handleUndoAdd, handleRedoDelete } = useSaveRoom();
 
-  // const addHistoryByDoubleClick = (newNode: Node) => {
-  //   const newMap = new Map(nodes);
-  //   newMap.set(newNode.id, newNode);
-  //   const newHistory = [...history];
-  //   setHistory([...newHistory, newMap]);
-  //   const len = history.length;
-  //   setHistoryIndex(len);
-  // };
+  const handleUndo = useCallback(() => {
+    if (historyIndex > 0) {
+      const prevIndex: number = historyIndex - 1;
+      const currHistory = history[historyIndex];
+      // const prevHistory = history[prevIndex];
+      const prevHistoryNodes = new Map(history[prevIndex].nodes);
+      if (currHistory.type === "add") {
+        // handle delete for firebase
+        handleUndoAdd(currHistory);
+      } else {
+        const updatedNodesToSave = Array.from(prevHistoryNodes.values());
+        saveUpdatedNodes(updatedNodesToSave).catch((err) => console.log(err));
+      }
+      setNodes(prevHistoryNodes);
+      setHistoryIndex(prevIndex);
+    }
+  }, [historyIndex, history, setNodes, setHistoryIndex, handleUndoAdd, saveUpdatedNodes]);
 
-  // const addHistory = () => {
-  //   const newMap = new Map(nodes);
-  //   const newHistory = [...history];
-  //   setHistory([...newHistory, newMap]);
-  //   const len = history.length;
-  //   setHistoryIndex(len);
-  // };
+  const handleRedo = useCallback(() => {
+    if (history.length - 1 > historyIndex) {
+      const nextIndex: number = historyIndex + 1;
+      const nextHistory = history[nextIndex];
+      const nextHistoryNodes = new Map(history[nextIndex].nodes);
+
+      if (nextHistory.type === "delete") {
+        // handle delete for firebase
+        handleRedoDelete(nextHistory);
+      } else {
+        const updatedNodesToSave = Array.from(nextHistoryNodes.values());
+        saveUpdatedNodes(updatedNodesToSave).catch((err) => console.log(err));
+      }
+      setNodes(nextHistoryNodes);
+      setHistoryIndex(nextIndex);
+    }
+  }, [history, historyIndex, setNodes, setHistoryIndex, handleRedoDelete, saveUpdatedNodes]);
+
   const undoByShortcutKey = useCallback(
     (e: KeyboardEvent) => {
       if (e.code === "KeyZ" && (e.ctrlKey || e.metaKey)) {
-        if (historyIndex > 0) {
-          const prevIndex: number = historyIndex - 1;
-          const prevHistory = new Map(history[prevIndex]);
-          setNodes(prevHistory);
-          setHistoryIndex(prevIndex);
-        }
+        handleUndo();
       }
     },
-    [history, historyIndex, setHistoryIndex, setNodes]
+    [handleUndo]
   );
 
   const redoByShortcutKey = useCallback(
     (e: KeyboardEvent) => {
       if (e.code === "KeyY" && (e.ctrlKey || e.metaKey)) {
-        if (history.length - 1 > historyIndex) {
-          const nextIndex: number = historyIndex + 1;
-          const nextHistory = new Map(history[nextIndex]);
-          setNodes(nextHistory);
-          setHistoryIndex(nextIndex);
-        }
+        handleRedo();
       }
     },
-    [history, historyIndex, setHistoryIndex, setNodes]
+    [handleRedo]
   );
 
-  const addToHistory = (updatedNodes: Map<string, Node>) => {
-    const newMap = new Map(updatedNodes);
+  const addToHistory = ({ type, diff, nodes: updatedNodes }: History) => {
+    const newUpdatedNodes = new Map(updatedNodes);
     const newHistory = [...history];
-    setHistory([...newHistory, newMap]);
+    setHistory([
+      ...newHistory,
+      {
+        type,
+        diff,
+        nodes: newUpdatedNodes,
+      },
+    ]);
     const len = history.length;
     setHistoryIndex(len);
   };
 
-  return { addToHistory, undoByShortcutKey, redoByShortcutKey };
+  return { addToHistory, undoByShortcutKey, redoByShortcutKey, handleUndo, handleRedo };
 };
 
 export default useHistory;
