@@ -17,7 +17,7 @@ const App = () => {
         <>
           <Header />
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={!authState.user ? <HomePage /> : <Navigate to="/dashboard" />} />
             <Route path="/dashboard" element={authState.user ? <DashboardPage /> : <Navigate to="/" />} />
             <Route path="/room/:id" element={authState.user ? <RoomPage /> : <Navigate to="/" />} />
           </Routes>
