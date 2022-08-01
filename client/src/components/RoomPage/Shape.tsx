@@ -8,6 +8,7 @@ import PolygonShape from "./ShapeComponent/PolygonShape";
 import useHistory from "../../hooks/useHistory";
 import Text from "./Text";
 import useSaveRoom from "../../hooks/firebase/useSaveRoom";
+import useSocket from "../../hooks/useSocket";
 
 type Props = {
   node: Node;
@@ -19,6 +20,7 @@ const Shape: React.FC<Props> = ({ node }) => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const { addToHistory } = useHistory();
   const { saveUpdatedNodes } = useSaveRoom();
+  const { updateRoom } = useSocket();
   useEffect(() => {
     // add node.id as attribute to ref of shape
     shapeRef.current?.setAttr("id", node.id);
@@ -29,13 +31,14 @@ const Shape: React.FC<Props> = ({ node }) => {
       const { x, y } = e.target.position();
       const currNode = prevState.get(node.id);
       if (!currNode) return prevState;
-      return new Map(
-        prevState.set(node.id, {
-          ...currNode,
-          x,
-          y,
-        })
-      );
+      const updatedNode = {
+        ...currNode,
+        x,
+        y,
+      };
+      prevState.set(node.id, updatedNode);
+      updateRoom([updatedNode]);
+      return new Map(prevState);
     });
   };
 
@@ -73,10 +76,11 @@ const Shape: React.FC<Props> = ({ node }) => {
     }
     if (selectedNode && selectedNode.id !== node.id) {
       setNodes((prevState) => {
-        const selectNode = nodes.get(selectedNode.id) as Node;
+        const selectNode = nodes.get(selectedNode.id);
         const currNode = nodes.get(node.id);
         if (
           currNode &&
+          selectNode &&
           !currNode.children.includes(selectedNode.id) &&
           !selectNode.children.includes(currNode.id) &&
           selectedNode.id !== currNode.id
@@ -97,6 +101,7 @@ const Shape: React.FC<Props> = ({ node }) => {
             nodes: prevState,
           });
           saveUpdatedNodes([updatedSelectNode, updatedCurrNode]).catch((err) => console.log(err));
+          updateRoom([updatedSelectNode, updatedCurrNode]);
           return new Map(prevState);
         }
         return prevState;
@@ -115,13 +120,14 @@ const Shape: React.FC<Props> = ({ node }) => {
       setNodes((prevState) => {
         const currNode = nodes.get(node.id);
         if (!currNode) return prevState;
-        return new Map(
-          prevState.set(node.id, {
-            ...currNode,
-            x: currGroup.x(),
-            y: currGroup.y(),
-          })
-        );
+        const updatedNode = {
+          ...currNode,
+          x: currGroup.x(),
+          y: currGroup.y(),
+        };
+        prevState.set(node.id, updatedNode);
+        updateRoom([updatedNode]);
+        return new Map(prevState);
       });
     }
   };
@@ -149,6 +155,7 @@ const Shape: React.FC<Props> = ({ node }) => {
           nodes: prevState,
         });
         saveUpdatedNodes([updatedNode]).catch((err) => console.log(err));
+        updateRoom([updatedNode]);
         return new Map(prevState);
       });
     }

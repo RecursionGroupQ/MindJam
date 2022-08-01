@@ -17,6 +17,7 @@ type Props = {
   stageConfig: StageConfig;
   addToHistory: ({ type, diff, nodes: updatedNodes }: History) => void;
   saveUpdatedNodes: (nodesToUpdate: Node[]) => Promise<void>;
+  updateRoom: (data: Node[]) => void;
 };
 
 // according to draft to html doc
@@ -120,6 +121,7 @@ const Editor: React.FC<Props> = ({
   stageConfig,
   addToHistory,
   saveUpdatedNodes,
+  updateRoom,
 }) => {
   const editorRef = useRef<DraftEditor>(null);
 
@@ -216,6 +218,7 @@ const Editor: React.FC<Props> = ({
           diff: null,
           nodes: prevState,
         });
+        updateRoom([updatedNode]);
       }
       return new Map(prevState);
     });

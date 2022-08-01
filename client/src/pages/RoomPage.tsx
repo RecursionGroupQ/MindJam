@@ -13,6 +13,8 @@ import ToolBox from "../components/RoomPage/ToolBox/ToolBox";
 import useHistory from "../hooks/useHistory";
 import useGetRoom from "../hooks/firebase/useGetRoom";
 import useSaveRoom from "../hooks/firebase/useSaveRoom";
+import useSocket from "../hooks/useSocket";
+import { SocketContext } from "../context/SocketContext";
 
 const RoomPage = () => {
   const {
@@ -46,6 +48,7 @@ const RoomPage = () => {
   const { id: ROOM_ID } = useParams();
   const { getRoom, isLoading } = useGetRoom();
   const { saveUpdatedNodes } = useSaveRoom();
+  const { joinRoom, leaveRoom, updateRoom } = useSocket();
   const [resizedCanvasWidth, setResizedCanvasWidth] = useState(CANVAS_WIDTH);
   const [resizedCanvasHeight, setResizedCanvasHeight] = useState(CANVAS_HEIGHT);
 
@@ -57,12 +60,17 @@ const RoomPage = () => {
     };
   }, [ROOM_ID, setRoomId]);
 
-  // get room data
+  // get room data and join room
   useEffect(() => {
     if (roomId) {
       getRoom(roomId).catch((err) => toast.error((err as Error).message));
+      joinRoom();
     }
-  }, [getRoom, roomId]);
+
+    return () => {
+      leaveRoom();
+    };
+  }, [getRoom, roomId, joinRoom, leaveRoom]);
 
   const resizeStage = () => {
     setResizedCanvasWidth(window.innerWidth);
@@ -151,6 +159,7 @@ const RoomPage = () => {
           return new Map(prevState);
         });
         saveUpdatedNodes([newNode]).catch((err) => console.log(err));
+        updateRoom([newNode]);
       }
     }
   };
@@ -295,65 +304,77 @@ const RoomPage = () => {
       )}
       {!isLoading && <ToolBox />}
       <RoomContext.Consumer>
-        {(value) => (
-          <Stage
-            style={stageStyle}
-            ref={stageRef}
-            className="-z-10 absolute top-0"
-            scaleX={stageConfig.stageScale}
-            scaleY={stageConfig.stageScale}
-            x={stageConfig.stageX}
-            y={stageConfig.stageY}
-            width={resizedCanvasWidth}
-            height={resizedCanvasHeight}
-            draggable={canDragStage}
-            onDragStart={handleDragStart}
-            onDragMove={handleDragMove}
-            onDragEnd={handleDragEnd}
-            onClick={handleClick}
-            onTap={handleClick}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onDblClick={handleDoubleClick}
-            // onDblTap={handleDoubleClick}
-            onWheel={handleWheel}
-          >
-            <RoomContext.Provider value={value}>
-              <Layer>
-                {!isLoading && (
-                  <>
-                    {Array.from(nodes.keys()).map((key) => {
-                      const currNode = nodes.get(key) as Node;
-                      return currNode.children.map((childId) => (
-                        <Edge key={`edge_${currNode.id}_${childId}`} node={currNode} childId={childId} />
-                      ));
-                    })}
-                    {Array.from(nodes.keys()).map((key) => (
-                      <Shape key={key} node={nodes.get(key) as Node} />
-                    ))}
-                    {selectedShapes && (
-                      <Transformer
-                        ref={transformerRef}
-                        rotateEnabled={false}
-                        anchorSize={15}
-                        anchorStrokeWidth={3}
-                        anchorCornerRadius={100}
-                        flipEnabled={false}
-                        boundBoxFunc={(oldBox, newBox) => {
-                          if (newBox.width > 800) {
-                            return oldBox;
-                          }
-                          return newBox;
-                        }}
-                      />
-                    )}
-                    <Rect ref={selectionRectRef} fill="rgba(99,102,241,0.2)" visible={false} />
-                  </>
-                )}
-              </Layer>
-            </RoomContext.Provider>
-          </Stage>
+        {(roomContextValue) => (
+          <SocketContext.Consumer>
+            {(socketContextValue) => (
+              <Stage
+                style={stageStyle}
+                ref={stageRef}
+                className="-z-10 absolute top-0"
+                scaleX={stageConfig.stageScale}
+                scaleY={stageConfig.stageScale}
+                x={stageConfig.stageX}
+                y={stageConfig.stageY}
+                width={resizedCanvasWidth}
+                height={resizedCanvasHeight}
+                draggable={canDragStage}
+                onDragStart={handleDragStart}
+                onDragMove={handleDragMove}
+                onDragEnd={handleDragEnd}
+                onClick={handleClick}
+                onTap={handleClick}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onDblClick={handleDoubleClick}
+                // onDblTap={handleDoubleClick}
+                onWheel={handleWheel}
+              >
+                <RoomContext.Provider value={roomContextValue}>
+                  <SocketContext.Provider value={socketContextValue}>
+                    <Layer>
+                      {!isLoading && (
+                        <>
+                          {Array.from(nodes.keys())
+                            .filter((key) => nodes.get(key) !== undefined)
+                            .map((key) => {
+                              const currNode = nodes.get(key) as Node;
+                              return currNode.children
+                                .filter((childId) => nodes.get(childId) !== undefined)
+                                .map((childId) => (
+                                  <Edge key={`edge_${currNode.id}_${childId}`} node={currNode} childId={childId} />
+                                ));
+                            })}
+                          {Array.from(nodes.keys())
+                            .filter((key) => nodes.get(key) !== undefined)
+                            .map((key) => (
+                              <Shape key={key} node={nodes.get(key) as Node} />
+                            ))}
+                          {selectedShapes && (
+                            <Transformer
+                              ref={transformerRef}
+                              rotateEnabled={false}
+                              anchorSize={15}
+                              anchorStrokeWidth={3}
+                              anchorCornerRadius={100}
+                              flipEnabled={false}
+                              boundBoxFunc={(oldBox, newBox) => {
+                                if (newBox.width > 800) {
+                                  return oldBox;
+                                }
+                                return newBox;
+                              }}
+                            />
+                          )}
+                          <Rect ref={selectionRectRef} fill="rgba(99,102,241,0.2)" visible={false} />
+                        </>
+                      )}
+                    </Layer>
+                  </SocketContext.Provider>
+                </RoomContext.Provider>
+              </Stage>
+            )}
+          </SocketContext.Consumer>
         )}
       </RoomContext.Consumer>
     </>

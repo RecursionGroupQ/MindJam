@@ -4,6 +4,7 @@ import useImage from "use-image";
 import { RoomContext, Node } from "../../context/RoomContext";
 import useSaveRoom from "../../hooks/firebase/useSaveRoom";
 import useHistory from "../../hooks/useHistory";
+import useSocket from "../../hooks/useSocket";
 
 type Props = {
   node: Node;
@@ -22,6 +23,7 @@ const Edge: React.FC<Props> = ({ node, childId }) => {
   const [edgeDeleteBtn] = useImage(IMG_URL);
   const { addToHistory } = useHistory();
   const { saveUpdatedNodes } = useSaveRoom();
+  const { updateRoom } = useSocket();
 
   const handleClick = () => {
     // delete edge
@@ -47,6 +49,7 @@ const Edge: React.FC<Props> = ({ node, childId }) => {
           nodes: updatedNodes,
         });
         saveUpdatedNodes([updatedCurrNode, updatedChildNode]).catch((err) => console.log(err));
+        updateRoom([updatedCurrNode, updatedChildNode]);
       }
       return updatedNodes;
     });

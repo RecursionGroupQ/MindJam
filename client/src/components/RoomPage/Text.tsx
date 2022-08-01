@@ -6,6 +6,7 @@ import { RoomContext, Node } from "../../context/RoomContext";
 import Editor from "./Editor";
 import useHistory from "../../hooks/useHistory";
 import useSaveRoom from "../../hooks/firebase/useSaveRoom";
+import useSocket from "../../hooks/useSocket";
 
 type Props = {
   node: Node;
@@ -17,6 +18,7 @@ const Text: React.FC<Props> = ({ node, isEditing, onToggleEdit }) => {
   const contentState = convertFromRaw(JSON.parse(node.text) as RawDraftContentState);
   const [editorState, setEditorState] = useState<EditorState>(EditorState.createWithContent(contentState));
   const { stageConfig, stageRef, setNodes } = useContext(RoomContext);
+  const { updateRoom } = useSocket();
   const textRef = useRef<HTMLDivElement | null>(null);
   const htmlString = draftToHtml(JSON.parse(node.text) as RawDraftContentState)
     .replaceAll(/<p><\/p>/g, "<br>")
@@ -25,6 +27,11 @@ const Text: React.FC<Props> = ({ node, isEditing, onToggleEdit }) => {
     .replaceAll(/<h3><\/h3>/g, "<br>");
   const { addToHistory } = useHistory();
   const { saveUpdatedNodes } = useSaveRoom();
+
+  useEffect(() => {
+    const updatedContentState = convertFromRaw(JSON.parse(node.text) as RawDraftContentState);
+    setEditorState(EditorState.createWithContent(updatedContentState));
+  }, [node.text]);
 
   useEffect(() => {
     if (stageRef && stageRef.current && !isEditing) {
@@ -102,6 +109,7 @@ const Text: React.FC<Props> = ({ node, isEditing, onToggleEdit }) => {
               stageConfig={stageConfig}
               addToHistory={addToHistory}
               saveUpdatedNodes={saveUpdatedNodes}
+              updateRoom={updateRoom}
             />
           </div>
         </Html>
