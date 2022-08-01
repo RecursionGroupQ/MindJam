@@ -20,6 +20,8 @@ const INLINE_FONTSIZE = [
   { label: "30", style: "fontsize-30" },
   { label: "36", style: "fontsize-36" },
   { label: "48", style: "fontsize-48" },
+  { label: "56", style: "fontsize-56" },
+  { label: "70", style: "fontsize-70" },
 ];
 
 const styles = {

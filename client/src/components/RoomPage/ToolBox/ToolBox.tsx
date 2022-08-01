@@ -116,28 +116,28 @@ const ToolBox = () => {
         <Card shadow>
           <CardBody className="flex flex-row !p-5 items-center">
             <Tooltip offset={15} content="fill">
-              <div className="w-full h-full flex items-center hover:-translate-y-1 hover:scale-110 duration-300">
+              <div className="w-full h-full flex items-center hover:-translate-y-1 hover:scale-110 duration-300 pl-4 pr-3">
                 <NodeColorPanel value="fill" />
               </div>
             </Tooltip>
             <Tooltip offset={15} content="stroke">
-              <div className="w-full h-full flex items-center hover:-translate-y-1 hover:scale-110 duration-300">
+              <div className="w-full h-full flex items-center hover:-translate-y-1 hover:scale-110 duration-300 px-3">
                 <NodeColorPanel value="stroke" />
               </div>
             </Tooltip>
 
             <Tooltip offset={15} content="edge">
-              <div className="w-full h-full flex items-center hover:-translate-y-1 hover:scale-110 duration-300">
+              <div className="w-full h-full flex items-center hover:-translate-y-1 hover:scale-110 duration-300 px-3">
                 <NodeColorPanel value="line" />
               </div>
             </Tooltip>
 
             <Tooltip offset={15} content="shape">
-              <div className="w-full h-full flex items-center hover:-translate-y-1 hover:scale-110 duration-300">
+              <div className="w-full h-full flex items-center hover:-translate-y-1 hover:scale-110 duration-300 px-3">
                 <NodeShapePanel />
               </div>
             </Tooltip>
-            <div className="ml-5 w-full h-full pl-6 pr-2 border-l-2">
+            <div className="ml-5 w-full h-full pl-8 pr-2 border-l-2">
               <Tooltip offset={15} hidden={historyIndex === 0} content="undo">
                 <button
                   className={`h-full w-full flex justify-center items-center ${

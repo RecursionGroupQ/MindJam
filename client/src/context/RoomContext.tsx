@@ -6,7 +6,7 @@ export const fills = ["#6B7280", "#EF4444", "#F59E0B", "#10B981", "#3B82F6", "#6
 export const CANVAS_WIDTH = window.innerWidth;
 export const CANVAS_HEIGHT = window.innerHeight;
 
-export type ShapeType = "rect" | "ellipse" | "star";
+export type ShapeType = "rect" | "ellipse" | "polygon";
 
 type Props = {
   children: React.ReactNode;
@@ -81,9 +81,9 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
   const [nodes, setNodes] = useState<Map<string, Node>>(new Map());
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [shapeType, setShapeType] = useState<ShapeType>("rect");
-  const [fillStyle, setFillStyle] = useState<string>("#00000000");
-  const [strokeStyle, setStrokeStyle] = useState<string>("#000000");
-  const [lineStyle, setLineStyle] = useState<string>("#000000");
+  const [fillStyle, setFillStyle] = useState<string>("#fff");
+  const [strokeStyle, setStrokeStyle] = useState<string>("#000");
+  const [lineStyle, setLineStyle] = useState<string>("#000");
   const [selectedShapes, setSelectedShapes] = useState<Konva.Group[]>([]);
   const [stageConfig, setStageConfig] = useState<StageConfig>({
     stageScale: 0.8,

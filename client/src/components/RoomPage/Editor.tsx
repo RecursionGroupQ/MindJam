@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import { Editor as DraftEditor, convertToRaw, RichUtils, ContentBlock, EditorState, Modifier } from "draft-js";
+import { Card } from "@material-tailwind/react";
 import { History, Node, StageConfig } from "../../context/RoomContext";
 import InlineStyleControls from "./Editor/InlineStyleControls";
 import BlockStyleControls from "./Editor/BlockStyleControls";
@@ -22,6 +23,12 @@ type Props = {
 // Converts inline styles color, background-color, font-size, font-family to a span tag with inline style details: <span style="color:xyz;font-size:xx">.
 // (The inline styles in JSON object should start with strings color or font-size like color-red, color-green or fontsize-12, fontsize-20).
 const colorStyleMap = {
+  "color-black": {
+    color: "black",
+  },
+  "color-white": {
+    color: "white",
+  },
   "color-red": {
     color: "red",
   },
@@ -60,6 +67,12 @@ const fontStyleMap = {
   },
   "fontsize-48": {
     fontSize: 48,
+  },
+  "fontsize-56": {
+    fontSize: 56,
+  },
+  "fontsize-70": {
+    fontSize: 70,
   },
 };
 
@@ -208,16 +221,28 @@ const Editor: React.FC<Props> = ({
     });
   };
 
+  const getTop = () => -80 - (50 * 1) / stageConfig.stageScale;
+
+  const getLeft = () => {
+    if (node.shapeType === "rect") {
+      return node.width / 2 - 225;
+    }
+    if (node.shapeType === "ellipse") {
+      return node.width / 2 - 225;
+    }
+    return node.width / 2 - 225;
+  };
+
   return (
-    <div>
+    <>
       {/* Toolbar */}
-      <div
-        className="flex justify-center align-middle bg-grey-100 z-20"
+      <Card
+        className="bg-blue-grey-900 z-1 px-2 py-1"
         style={{
-          width: 650,
+          width: 450,
           position: "absolute",
-          left: -325 + node.width / 2,
-          top: -80 * (1 / stageConfig.stageScale),
+          top: getTop(),
+          left: getLeft(),
           transform: `scale(${1 / stageConfig.stageScale})`,
         }}
       >
@@ -229,20 +254,21 @@ const Editor: React.FC<Props> = ({
           <InlineStyleControls editorState={editorState} onToggle={toggleInlineStyle} />
           <BlockStyleControls editorState={editorState} onToggle={toggleBlockType} />
         </div>
-      </div>
+      </Card>
       {/* Editor */}
-      <div className="p-2">
+      <div className="p-2 relative text-center">
         <DraftEditor
           ref={editorRef}
           blockStyleFn={getBlockStyle}
           customStyleMap={{ ...styleMap, ...colorStyleMap, ...fontStyleMap }}
           editorState={editorState}
           onChange={setEditorState}
-          placeholder="Add text"
+          placeholder="Add Text"
           onBlur={handleOnBlur}
+          textAlignment="center"
         />
       </div>
-    </div>
+    </>
   );
 };
 

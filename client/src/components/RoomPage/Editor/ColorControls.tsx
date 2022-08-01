@@ -3,6 +3,12 @@ import { EditorState } from "draft-js";
 import "./RichEditor.css";
 
 interface ColorStyleMap {
+  "color-black": {
+    color: string;
+  };
+  "color-white": {
+    color: string;
+  };
   "color-red": {
     color: string;
   };
@@ -34,13 +40,14 @@ type Props = {
 
 type StyleButtonProps = {
   active: boolean;
-  label: string;
   onToggle: (inlineState: string) => void;
   style: string;
   colorStyleMap: ColorStyleMap;
 };
 
 const COLORS = [
+  { label: "Black", style: "color-black" },
+  { label: "White", style: "color-white" },
   { label: "Red", style: "color-red" },
   { label: "Orange", style: "color-orange" },
   { label: "Yellow", style: "color-yellow" },
@@ -55,15 +62,9 @@ const styles = {
     fontFamily: "'Helvetica', sans-serif",
     fontSize: 18,
   },
-  styleButton: {
-    color: "#999",
-    cursor: "pointer",
-    marginRight: 10,
-    padding: "2px 0",
-  },
 };
 
-const StyleButton: React.FC<StyleButtonProps> = ({ colorStyleMap, active, label, onToggle, style }) => {
+const StyleButton: React.FC<StyleButtonProps> = ({ colorStyleMap, active, onToggle, style }) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleOnToggle = (e: any) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
@@ -74,17 +75,17 @@ const StyleButton: React.FC<StyleButtonProps> = ({ colorStyleMap, active, label,
   let styler;
   if (active) {
     styler = {
-      ...styles.styleButton,
-      ...colorStyleMap[style as keyof ColorStyleMap],
+      outline: "2px solid black",
+      backgroundColor: colorStyleMap[style as keyof ColorStyleMap].color,
     };
   } else {
-    styler = styles.styleButton;
+    styler = {
+      backgroundColor: colorStyleMap[style as keyof ColorStyleMap].color,
+    };
   }
   return (
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions
-    <span style={styler} onMouseDown={handleOnToggle}>
-      {label}
-    </span>
+    <span className="mr-2 px-3 rounded-full cursor-pointer" style={styler} onMouseDown={handleOnToggle} />
   );
 };
 
@@ -97,7 +98,6 @@ const ColorControls: React.FC<Props> = ({ editorState, onToggle, colorStyleMap }
         <StyleButton
           key={type.label}
           active={currentStyle.has(type.style)}
-          label={type.label}
           onToggle={onToggle}
           style={type.style}
           colorStyleMap={colorStyleMap}
