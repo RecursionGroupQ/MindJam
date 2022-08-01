@@ -46,6 +46,8 @@ const RoomPage = () => {
   const { id: ROOM_ID } = useParams();
   const { getRoom, isLoading } = useGetRoom();
   const { saveUpdatedNodes } = useSaveRoom();
+  const [resizedCanvasWidth, setResizedCanvasWidth] = useState(CANVAS_WIDTH);
+  const [resizedCanvasHeight, setResizedCanvasHeight] = useState(CANVAS_HEIGHT);
 
   // set room id
   useEffect(() => {
@@ -61,6 +63,18 @@ const RoomPage = () => {
       getRoom(roomId).catch((err) => toast.error((err as Error).message));
     }
   }, [getRoom, roomId]);
+
+  const resizeStage = () => {
+    setResizedCanvasWidth(window.innerWidth);
+    setResizedCanvasHeight(window.innerHeight);
+  };
+
+  useEffect(() => {
+    window.addEventListener("resize", resizeStage);
+    return () => {
+      window.removeEventListener("resize", resizeStage);
+    };
+  }, [resizedCanvasWidth, resizedCanvasHeight]);
 
   useEffect(() => {
     document.addEventListener("keydown", undoByShortcutKey);
@@ -290,8 +304,8 @@ const RoomPage = () => {
             scaleY={stageConfig.stageScale}
             x={stageConfig.stageX}
             y={stageConfig.stageY}
-            width={CANVAS_WIDTH}
-            height={CANVAS_HEIGHT}
+            width={resizedCanvasWidth}
+            height={resizedCanvasHeight}
             draggable={canDragStage}
             onDragStart={handleDragStart}
             onDragMove={handleDragMove}
