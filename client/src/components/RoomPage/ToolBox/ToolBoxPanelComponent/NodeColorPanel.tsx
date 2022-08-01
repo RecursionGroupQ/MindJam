@@ -4,7 +4,7 @@ import { Popover, PopoverHandler, PopoverContent } from "@material-tailwind/reac
 
 import { BsPencilSquare } from "react-icons/bs";
 import { IoMdColorFill } from "react-icons/io";
-import { MdOutlineBorderColor, MdOutlineHorizontalRule } from "react-icons/md";
+import { MdOutlineBorderColor } from "react-icons/md";
 
 import NodeColor from "./NodeColor";
 import { RoomContext } from "../../../../context/RoomContext";
@@ -23,7 +23,7 @@ const NodeColorPanel: React.FC<Props> = ({ value }) => {
           <div className="h-full w-full flex justify-center">
             <button type="button">
               <IoMdColorFill size={35} color="black" className="inline-block" />
-              <MdOutlineHorizontalRule size={50} color={fillStyle} className="block -mt-3" />
+              <div style={{ backgroundColor: fillStyle }} className="mt-3 px-2.5 py-0.5 rounded" />
             </button>
           </div>
         </PopoverHandler>
@@ -33,7 +33,7 @@ const NodeColorPanel: React.FC<Props> = ({ value }) => {
           <div className="h-full w-full flex justify-center">
             <button type="button">
               <BsPencilSquare size={35} color="black" className="inline-block" />
-              <MdOutlineHorizontalRule size={50} color={strokeStyle} className="block -mt-3" />
+              <div style={{ backgroundColor: strokeStyle }} className="mt-3 px-2.5 py-0.5 rounded" />
             </button>
           </div>
         </PopoverHandler>
@@ -43,12 +43,12 @@ const NodeColorPanel: React.FC<Props> = ({ value }) => {
           <div className="h-full w-full flex justify-center">
             <button type="button">
               <MdOutlineBorderColor size={35} color="black" className="inline-block" />
-              <MdOutlineHorizontalRule size={50} color={lineStyle} className="block -mt-3" />
+              <div style={{ backgroundColor: lineStyle }} className="mt-3 px-2.5 py-0.5 rounded" />
             </button>
           </div>
         </PopoverHandler>
       )}
-      <PopoverContent className="bg-grey-300">
+      <PopoverContent className="bg-blue-grey-700">
         <NodeColor value={value} />
       </PopoverContent>
     </Popover>

@@ -39,40 +39,59 @@ const Text: React.FC<Props> = ({ node, isEditing, onToggleEdit }) => {
     }
   }, [stageRef, isEditing]);
 
-  // ノードとテキストの位置を調整
-  let x: number;
-  if (node.shapeType === "rect") x = 0;
-  else if (node.shapeType === "ellipse") x = -node.width / 4;
-  else x = -node.width / 10;
+  const getTextWidth = () => {
+    if (node.shapeType === "ellipse") {
+      return (node.width / 2) * Math.sqrt(2);
+    }
+    if (node.shapeType === "polygon") {
+      return (node.width / 2) * Math.sqrt(2);
+    }
+    return node.width;
+  };
 
-  let y: number;
-  if (node.shapeType === "rect") y = 0;
-  else if (node.shapeType === "ellipse") y = -node.height / 4;
-  else y = -node.height / 4;
+  const getTextHeight = () => {
+    if (node.shapeType === "ellipse") {
+      return (node.height / 2) * Math.sqrt(2);
+    }
+    if (node.shapeType === "polygon") {
+      return (node.width / 2) * Math.sqrt(2);
+    }
+    return node.height;
+  };
 
-  let width: number;
-  if (node.shapeType === "rect") width = node.width;
-  else if (node.shapeType === "ellipse") width = node.width / 2;
-  else width = node.width / 5;
+  const getX = () => {
+    if (node.shapeType === "ellipse") {
+      return -getTextWidth() / 2;
+    }
+    if (node.shapeType === "polygon") {
+      return -getTextWidth() / 2;
+    }
+    return 0;
+  };
 
-  let height: number;
-  if (node.shapeType === "rect") height = node.height;
-  else if (node.shapeType === "ellipse") height = node.height / 2;
-  else height = node.height / 2;
+  const getY = () => {
+    if (node.shapeType === "ellipse") {
+      return -getTextHeight() / 2;
+    }
+    if (node.shapeType === "polygon") {
+      return -getTextHeight() / 2;
+    }
+    return 0;
+  };
 
   return (
     <>
       {isEditing && (
         <Html
           groupProps={{
-            x,
-            y,
-            width: node.width,
-            height: node.height,
+            x: getX(),
+            y: getY(),
+            width: getTextWidth(),
+            height: getTextHeight(),
           }}
           divProps={{ style: { opacity: 1 } }}
         >
-          <div className="rounded-md sm:text-lg overflow-scroll" style={{ width, height }}>
+          <div className="rounded-md sm:text-lg" style={{ width: getTextWidth(), height: getTextHeight() }}>
             {/* components inside <Html /> may not have access to upper context (so you have to bridge contexts manually) */}
             <Editor
               editorState={editorState}
@@ -90,10 +109,10 @@ const Text: React.FC<Props> = ({ node, isEditing, onToggleEdit }) => {
       {!isEditing && (
         <Html
           groupProps={{
-            x,
-            y,
-            width: node.width,
-            height: node.height,
+            x: getX(),
+            y: getY(),
+            width: getTextWidth(),
+            height: getTextHeight(),
           }}
           divProps={{ style: { opacity: 1 } }}
         >
@@ -102,21 +121,18 @@ const Text: React.FC<Props> = ({ node, isEditing, onToggleEdit }) => {
             // テキストのcssのclass
             className="text"
             style={{
-              width,
-              height,
+              width: getTextWidth(),
+              height: getTextHeight(),
               overflow: "scroll",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
             }}
             onDoubleClick={onToggleEdit}
             aria-hidden="true"
           >
             <div
-              className="p-2 rounded-md sm:text-lg prose prose-stone"
+              className="p-2 rounded-md sm:text-lg prose prose-stone text-center"
               // eslint-disable-next-line react/no-danger
               dangerouslySetInnerHTML={{ __html: htmlString }}
-              style={{ width, height }}
+              style={{ width: getTextWidth(), height: getTextHeight() }}
             />
           </div>
         </Html>
