@@ -14,8 +14,11 @@ export type Node = {
   strokeStyle: string;
 };
 
+export type UpdateRoomTypes = "update" | "history";
+
 export type UpdateRoomPayload = {
   roomId: string;
+  type: UpdateRoomTypes;
   data: Node[];
 };
 
@@ -25,4 +28,18 @@ export type DeleteRoomNodesPayload = {
     nodesToUpdate: Node[];
     nodesToDelete: Node[];
   };
+};
+
+export type RoomUser = {
+  socketId: string;
+  user: {
+    name: string | null;
+    photoURL: string | null;
+    color: string;
+  };
+};
+
+export type RoomUsers = {
+  colorIdx: number;
+  users: RoomUser[];
 };

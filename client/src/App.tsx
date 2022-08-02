@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-import Header from "./components/Header";
+import Header from "./components/Header/Header";
 import RoomPage from "./pages/RoomPage";
 import HomePage from "./pages/HomePage";
 import { AuthContext } from "./context/AuthContext";

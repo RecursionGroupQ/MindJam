@@ -2,6 +2,7 @@ import { useContext } from "react";
 import { Node, RoomContext, ShapeType } from "../context/RoomContext";
 import useSaveRoom from "./firebase/useSaveRoom";
 import useHistory from "./useHistory";
+import useSocket from "./useSocket";
 
 const useChangeNodeStyle = () => {
   const { nodes, setNodes, selectedNode, selectedShapes, setFillStyle, setStrokeStyle, setLineStyle, setShapeType } =
@@ -9,6 +10,7 @@ const useChangeNodeStyle = () => {
 
   const { addToHistory } = useHistory();
   const { saveUpdatedNodes } = useSaveRoom();
+  const { updateRoom } = useSocket();
 
   const changeNodeColors = (color: string, value: "fill" | "stroke" | "line") => {
     if (value === "fill") {
@@ -22,6 +24,7 @@ const useChangeNodeStyle = () => {
             fillStyle: color,
           };
           saveUpdatedNodes([updatedNode]).catch((err) => console.log(err));
+          updateRoom([updatedNode], "update");
           return new Map(prevState.set(selectedNode.id, updatedNode));
         });
       } else if (selectedShapes.length >= 2) {
@@ -40,6 +43,7 @@ const useChangeNodeStyle = () => {
             updatedNodesToSave.push(updatedNode);
           });
           saveUpdatedNodes(updatedNodesToSave).catch((err) => console.log(err));
+          updateRoom(updatedNodesToSave, "update");
           return updatedNodes;
         });
       }
@@ -54,6 +58,7 @@ const useChangeNodeStyle = () => {
             strokeStyle: color,
           };
           saveUpdatedNodes([updatedNode]).catch((err) => console.log(err));
+          updateRoom([updatedNode], "update");
           return new Map(prevState.set(selectedNode.id, updatedNode));
         });
       } else if (selectedShapes.length >= 2) {
@@ -72,6 +77,7 @@ const useChangeNodeStyle = () => {
             updatedNodesToSave.push(updatedNode);
           });
           saveUpdatedNodes(updatedNodesToSave).catch((err) => console.log(err));
+          updateRoom(updatedNodesToSave, "update");
           return updatedNodes;
         });
       }
@@ -98,6 +104,7 @@ const useChangeNodeStyle = () => {
           diff: null,
           nodes: prevState,
         });
+        updateRoom([updatedNode], "update");
         return new Map(prevState);
       });
     } else if (selectedShapes.length >= 2) {
@@ -121,6 +128,7 @@ const useChangeNodeStyle = () => {
           diff: null,
           nodes: updatedNodes,
         });
+        updateRoom(updatedNodesToSave, "update");
         return updatedNodes;
       });
     }

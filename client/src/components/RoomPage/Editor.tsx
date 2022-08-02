@@ -7,6 +7,7 @@ import BlockStyleControls from "./Editor/BlockStyleControls";
 import "draft-js/dist/Draft.css";
 import ColorControls from "./Editor/ColorControls";
 import FontControls from "./Editor/FontControls";
+import { UpdateRoomTypes } from "../../context/SocketContext";
 
 type Props = {
   node: Node;
@@ -17,7 +18,7 @@ type Props = {
   stageConfig: StageConfig;
   addToHistory: ({ type, diff, nodes: updatedNodes }: History) => void;
   saveUpdatedNodes: (nodesToUpdate: Node[]) => Promise<void>;
-  updateRoom: (data: Node[]) => void;
+  updateRoom: (data: Node[], type: UpdateRoomTypes) => void;
 };
 
 // according to draft to html doc
@@ -218,7 +219,7 @@ const Editor: React.FC<Props> = ({
           diff: null,
           nodes: prevState,
         });
-        updateRoom([updatedNode]);
+        updateRoom([updatedNode], "update");
       }
       return new Map(prevState);
     });

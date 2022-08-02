@@ -1,4 +1,4 @@
-import React, { createContext, useState, useMemo, useEffect } from "react";
+import React, { createContext, useState, useMemo } from "react";
 import Konva from "konva";
 
 export const fills = ["#6B7280", "#EF4444", "#F59E0B", "#10B981", "#3B82F6", "#6366F1", "#8B5CF6", "#EC4899"];
@@ -42,6 +42,17 @@ type StageStyle = {
 
 export type History = { type: "update" | "add" | "delete"; diff: null | string[]; nodes: Map<string, Node> };
 
+export type UserCursor = {
+  x: number;
+  y: number;
+};
+
+export type RoomUser = {
+  name: string | null;
+  photoURL: string | null;
+  color: string;
+};
+
 type IRoomContext = {
   nodes: Map<string, Node>;
   setNodes: React.Dispatch<React.SetStateAction<Map<string, Node>>>;
@@ -73,6 +84,12 @@ type IRoomContext = {
   setHistoryIndex: React.Dispatch<React.SetStateAction<number>>;
   roomId: string | undefined;
   setRoomId: React.Dispatch<React.SetStateAction<string | undefined>>;
+  userCursors: Map<string, UserCursor>;
+  setUserCursors: React.Dispatch<React.SetStateAction<Map<string, UserCursor>>>;
+  roomUsers: Map<string, RoomUser>;
+  setRoomUsers: React.Dispatch<React.SetStateAction<Map<string, RoomUser>>>;
+  roomName: string;
+  setRoomName: React.Dispatch<React.SetStateAction<string>>;
 };
 export const RoomContext: React.Context<IRoomContext> = createContext({} as IRoomContext);
 
@@ -108,16 +125,9 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
   ]);
   const [historyIndex, setHistoryIndex] = useState<number>(0);
   const [roomId, setRoomId] = useState<string | undefined>();
-
-  useEffect(() => {
-    if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setStageStyle((prevState) => ({
-        ...prevState,
-        backgroundColor: "#6b7280",
-        backgroundImage: "radial-gradient(#cbd5e1 1.1px, #6b7280 1.1px)",
-      }));
-    }
-  }, []);
+  const [roomName, setRoomName] = useState<string>("");
+  const [userCursors, setUserCursors] = useState<Map<string, UserCursor>>(new Map());
+  const [roomUsers, setRoomUsers] = useState<Map<string, RoomUser>>(new Map());
 
   const value = useMemo(
     () => ({
@@ -151,6 +161,12 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
       setHistoryIndex,
       roomId,
       setRoomId,
+      userCursors,
+      setUserCursors,
+      roomUsers,
+      setRoomUsers,
+      roomName,
+      setRoomName,
     }),
     [
       nodes,
@@ -168,6 +184,9 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
       historyIndex,
       stageRef,
       roomId,
+      userCursors,
+      roomUsers,
+      roomName,
     ]
   );
 
