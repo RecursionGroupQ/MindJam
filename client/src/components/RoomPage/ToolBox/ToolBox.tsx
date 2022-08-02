@@ -7,6 +7,7 @@ import NodeColorPanel from "./ToolBoxPanelComponent/NodeColorPanel";
 import NodeShapePanel from "./ToolBoxPanelComponent/NodeShapePanel";
 import useHistory from "../../../hooks/useHistory";
 import useSaveRoom from "../../../hooks/firebase/useSaveRoom";
+import useSocket from "../../../hooks/useSocket";
 
 const ToolBox = () => {
   const { nodes, setNodes, history, historyIndex, selectedNode, selectedShapes, setSelectedNode, setSelectedShapes } =
@@ -14,6 +15,7 @@ const ToolBox = () => {
 
   const { addToHistory, handleRedo, handleUndo } = useHistory();
   const { saveDeletedNodes } = useSaveRoom();
+  const { deleteRoomNodes } = useSocket();
 
   const handleNodeDelete = () => {
     if (selectedNode) {
@@ -50,6 +52,7 @@ const ToolBox = () => {
             diff: [currNode.id],
             nodes: updatedNodes,
           });
+          deleteRoomNodes(updatedNodesToSave, [currNode]);
           saveDeletedNodes(updatedNodesToSave, [currNode]).catch((err) => console.log(err));
         }
         return updatedNodes;
@@ -94,6 +97,7 @@ const ToolBox = () => {
           diff: deletedNodesToSave.map((node) => node.id),
           nodes: updatedNodes,
         });
+        deleteRoomNodes(updatedNodesToSave, deletedNodesToSave);
         saveDeletedNodes(updatedNodesToSave, deletedNodesToSave).catch((err) => console.log(err));
         return updatedNodes;
       });

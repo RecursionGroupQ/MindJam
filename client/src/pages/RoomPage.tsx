@@ -3,6 +3,7 @@ import { Stage, Layer, Transformer, Rect } from "react-konva";
 import Konva from "konva";
 import { nanoid } from "nanoid";
 import { ContentState, convertToRaw } from "draft-js";
+import htmlToDraft from "html-to-draftjs";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Oval } from "react-loader-spinner";
@@ -13,6 +14,10 @@ import ToolBox from "../components/RoomPage/ToolBox/ToolBox";
 import useHistory from "../hooks/useHistory";
 import useGetRoom from "../hooks/firebase/useGetRoom";
 import useSaveRoom from "../hooks/firebase/useSaveRoom";
+import useSocket from "../hooks/useSocket";
+import { SocketContext } from "../context/SocketContext";
+import UserCursor from "../components/RoomPage/UserCursor";
+import { AuthContext } from "../context/AuthContext";
 
 const RoomPage = () => {
   const {
@@ -35,7 +40,13 @@ const RoomPage = () => {
     setHistoryIndex,
     setRoomId,
     roomId,
+    userCursors,
+    roomUsers,
+    setRoomUsers,
+    setUserCursors,
+    setRoomName,
   } = useContext(RoomContext);
+  const { authState } = useContext(AuthContext);
 
   const [canDragStage, setCanDragStage] = useState(true);
   const transformerRef = useRef<Konva.Transformer>(null);
@@ -46,6 +57,7 @@ const RoomPage = () => {
   const { id: ROOM_ID } = useParams();
   const { getRoom, isLoading } = useGetRoom();
   const { saveUpdatedNodes } = useSaveRoom();
+  const { joinRoom, leaveRoom, updateRoom, updateUserMouse } = useSocket();
   const [resizedCanvasWidth, setResizedCanvasWidth] = useState(CANVAS_WIDTH);
   const [resizedCanvasHeight, setResizedCanvasHeight] = useState(CANVAS_HEIGHT);
 
@@ -57,12 +69,20 @@ const RoomPage = () => {
     };
   }, [ROOM_ID, setRoomId]);
 
-  // get room data
+  // get room data and join room
   useEffect(() => {
     if (roomId) {
       getRoom(roomId).catch((err) => toast.error((err as Error).message));
+      joinRoom();
     }
-  }, [getRoom, roomId]);
+
+    return () => {
+      leaveRoom();
+      setRoomUsers(new Map());
+      setUserCursors(new Map());
+      setRoomName("");
+    };
+  }, [getRoom, roomId, joinRoom, leaveRoom, setRoomUsers, setUserCursors, setRoomName]);
 
   const resizeStage = () => {
     setResizedCanvasWidth(window.innerWidth);
@@ -128,11 +148,16 @@ const RoomPage = () => {
       pointerPosition = stage.getRelativePointerPosition();
       if (pointerPosition) {
         const id = nanoid();
+        const defaultBlockArray = htmlToDraft(`<p style="font-size: 30px;">node-${id}</p>`);
+        const contentState = ContentState.createFromBlockArray(
+          defaultBlockArray.contentBlocks,
+          defaultBlockArray.entityMap
+        );
         const newNode: Node = {
           id,
           children: [],
           parents: [],
-          text: JSON.stringify(convertToRaw(ContentState.createFromText(`node-${id}`))),
+          text: JSON.stringify(convertToRaw(contentState)),
           shapeType,
           x: pointerPosition.x,
           y: pointerPosition.y,
@@ -151,6 +176,7 @@ const RoomPage = () => {
           return new Map(prevState);
         });
         saveUpdatedNodes([newNode]).catch((err) => console.log(err));
+        updateRoom([newNode], "update");
       }
     }
   };
@@ -251,6 +277,16 @@ const RoomPage = () => {
 
   // マウスムーブで複数選択範囲を設定
   const handleMouseMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    // user mouse
+    const uid = authState.user?.uid;
+    if (uid) {
+      const mouseX = stageRef.current?.getRelativePointerPosition()?.x;
+      const mouseY = stageRef.current?.getRelativePointerPosition()?.y;
+      if (mouseX && mouseY) {
+        updateUserMouse({ x: mouseX, y: mouseY });
+      }
+    }
+
     if (!selectionRectRef.current?.visible() || canDragStage) {
       selectionRectRef.current?.visible(false);
       return;
@@ -295,65 +331,100 @@ const RoomPage = () => {
       )}
       {!isLoading && <ToolBox />}
       <RoomContext.Consumer>
-        {(value) => (
-          <Stage
-            style={stageStyle}
-            ref={stageRef}
-            className="-z-10 absolute top-0"
-            scaleX={stageConfig.stageScale}
-            scaleY={stageConfig.stageScale}
-            x={stageConfig.stageX}
-            y={stageConfig.stageY}
-            width={resizedCanvasWidth}
-            height={resizedCanvasHeight}
-            draggable={canDragStage}
-            onDragStart={handleDragStart}
-            onDragMove={handleDragMove}
-            onDragEnd={handleDragEnd}
-            onClick={handleClick}
-            onTap={handleClick}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onDblClick={handleDoubleClick}
-            // onDblTap={handleDoubleClick}
-            onWheel={handleWheel}
-          >
-            <RoomContext.Provider value={value}>
-              <Layer>
-                {!isLoading && (
-                  <>
-                    {Array.from(nodes.keys()).map((key) => {
-                      const currNode = nodes.get(key) as Node;
-                      return currNode.children.map((childId) => (
-                        <Edge key={`edge_${currNode.id}_${childId}`} node={currNode} childId={childId} />
-                      ));
-                    })}
-                    {Array.from(nodes.keys()).map((key) => (
-                      <Shape key={key} node={nodes.get(key) as Node} />
-                    ))}
-                    {selectedShapes && (
-                      <Transformer
-                        ref={transformerRef}
-                        rotateEnabled={false}
-                        anchorSize={15}
-                        anchorStrokeWidth={3}
-                        anchorCornerRadius={100}
-                        flipEnabled={false}
-                        boundBoxFunc={(oldBox, newBox) => {
-                          if (newBox.width > 800) {
-                            return oldBox;
-                          }
-                          return newBox;
-                        }}
-                      />
-                    )}
-                    <Rect ref={selectionRectRef} fill="rgba(99,102,241,0.2)" visible={false} />
-                  </>
-                )}
-              </Layer>
-            </RoomContext.Provider>
-          </Stage>
+        {(roomContextValue) => (
+          <SocketContext.Consumer>
+            {(socketContextValue) => (
+              <Stage
+                style={stageStyle}
+                ref={stageRef}
+                className="-z-10 absolute top-0"
+                scaleX={stageConfig.stageScale}
+                scaleY={stageConfig.stageScale}
+                x={stageConfig.stageX}
+                y={stageConfig.stageY}
+                width={resizedCanvasWidth}
+                height={resizedCanvasHeight}
+                draggable={canDragStage}
+                onDragStart={handleDragStart}
+                onDragMove={handleDragMove}
+                onDragEnd={handleDragEnd}
+                onClick={handleClick}
+                onTap={handleClick}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onDblClick={handleDoubleClick}
+                // onDblTap={handleDoubleClick}
+                onWheel={handleWheel}
+              >
+                <RoomContext.Provider value={roomContextValue}>
+                  <SocketContext.Provider value={socketContextValue}>
+                    <Layer>
+                      {!isLoading && (
+                        <>
+                          {Array.from(nodes.keys()).map((key) => {
+                            const currNode = nodes.get(key);
+                            if (!currNode) return null;
+                            return currNode.children.map((childId) => {
+                              const currChild = nodes.get(childId);
+                              if (!currChild) return null;
+                              return (
+                                <Edge
+                                  key={`edge_${currNode.id}_${childId}`}
+                                  node={currNode}
+                                  currNodeChild={currChild}
+                                />
+                              );
+                            });
+                          })}
+                          {Array.from(nodes.keys()).map((key) => {
+                            const currNode = nodes.get(key);
+                            if (!currNode) return null;
+                            return <Shape key={key} node={currNode} />;
+                          })}
+                          {selectedShapes && (
+                            <Transformer
+                              ref={transformerRef}
+                              rotateEnabled={false}
+                              anchorSize={15}
+                              anchorStrokeWidth={3}
+                              anchorCornerRadius={100}
+                              flipEnabled={false}
+                              boundBoxFunc={(oldBox, newBox) => {
+                                if (newBox.width > 800) {
+                                  return oldBox;
+                                }
+                                return newBox;
+                              }}
+                            />
+                          )}
+                          <Rect ref={selectionRectRef} fill="rgba(99,102,241,0.2)" visible={false} />
+                          {userCursors && (
+                            <>
+                              {Array.from(roomUsers.keys()).map((key) => {
+                                const currUserCursor = userCursors.get(key);
+                                const currUser = roomUsers.get(key);
+                                if (!currUserCursor || !currUser) return null;
+                                return (
+                                  <UserCursor
+                                    key={key}
+                                    x={currUserCursor.x}
+                                    y={currUserCursor.y}
+                                    color={currUser.color}
+                                    name={currUser.name}
+                                  />
+                                );
+                              })}
+                            </>
+                          )}
+                        </>
+                      )}
+                    </Layer>
+                  </SocketContext.Provider>
+                </RoomContext.Provider>
+              </Stage>
+            )}
+          </SocketContext.Consumer>
         )}
       </RoomContext.Consumer>
     </>

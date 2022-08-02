@@ -8,7 +8,7 @@ import { RoomsDocument } from "../../firebase/types";
 
 const useGetRoom = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const { setNodes, setHistory, setHistoryIndex } = useContext(RoomContext);
+  const { setNodes, setHistory, setHistoryIndex, setRoomName } = useContext(RoomContext);
   const navigate = useNavigate();
 
   const getRoom = useCallback(
@@ -18,7 +18,8 @@ const useGetRoom = () => {
         const docSnap = await getDoc(docRef);
         if (!docSnap.exists()) throw new Error("room does not exist :(");
 
-        const nodesData = Object.values((docSnap.data() as RoomsDocument).nodes);
+        const data = docSnap.data() as RoomsDocument;
+        const nodesData = Object.values(data.nodes);
 
         if (nodesData) {
           const nodesMap: Map<string, Node> = new Map();
@@ -36,13 +37,14 @@ const useGetRoom = () => {
           setHistoryIndex(0);
         }
         setIsLoading(false);
+        setRoomName(data.projectName);
       } catch (error) {
         navigate("/dashboard");
         toast.error((error as Error).message);
         setIsLoading(false);
       }
     },
-    [setNodes, setHistory, navigate, setHistoryIndex]
+    [setNodes, setHistory, navigate, setHistoryIndex, setRoomName]
   );
 
   return { getRoom, isLoading };
