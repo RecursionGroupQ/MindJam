@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Dialog,
@@ -9,7 +9,10 @@ import {
   CardBody,
   CardFooter,
   Typography,
+  Select,
+  Option,
 } from "@material-tailwind/react";
+import { HiSortAscending, HiSortDescending } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Oval } from "react-loader-spinner";
@@ -17,12 +20,15 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 import { motion } from "framer-motion";
 import useCreateRoom from "../hooks/firebase/useCreateRoom";
 import useGetRooms from "../hooks/firebase/useGetRooms";
+import { UserRoom } from "../firebase/types";
 
 const DashboardPage = () => {
   const { createRoom, isLoading: createRoomIsLoading } = useCreateRoom();
   const [openDialog, setOpenDialog] = useState(false);
   const [projectName, setProjectName] = useState<string>("");
-  const { userRooms, isLoading: userRoomsIsLoading } = useGetRooms();
+  const { userRooms, setUserRooms, isLoading: userRoomsIsLoading } = useGetRooms();
+  const [selectedSortValue, setSelectedSortValue] = useState<string>("");
+  const [isAscendingOrder, setIsAscendingOder] = useState<boolean>(true);
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -35,6 +41,80 @@ const DashboardPage = () => {
   const handleClick = (roomId: string) => {
     navigate(`/room/${roomId}`);
   };
+
+  // project名でソート
+  const sortProjectName = (rooms: UserRoom[], isAscOrder: boolean) => {
+    const newUserRooms = [...rooms];
+    if (isAscOrder) {
+      newUserRooms.sort((a, b) => {
+        if (a.projectName > b.projectName) {
+          return 1;
+        }
+        if (a.projectName < b.projectName) {
+          return -1;
+        }
+        return 0;
+      });
+      return newUserRooms;
+    }
+    newUserRooms.sort((a, b) => {
+      if (a.projectName < b.projectName) {
+        return 1;
+      }
+      if (a.projectName > b.projectName) {
+        return -1;
+      }
+      return 0;
+    });
+    return newUserRooms;
+  };
+
+  // 作成日でソート
+  const sortCreatedAt = (rooms: UserRoom[], isAscOrder: boolean) => {
+    const newUserRooms = [...rooms];
+    if (isAscOrder) {
+      newUserRooms.sort((a, b) => {
+        if (a.createdAt > b.createdAt) {
+          return 1;
+        }
+        if (a.createdAt < b.createdAt) {
+          return -1;
+        }
+        return 0;
+      });
+      return newUserRooms;
+    }
+    newUserRooms.sort((a, b) => {
+      if (a.createdAt < b.createdAt) {
+        return 1;
+      }
+      if (a.createdAt > b.createdAt) {
+        return -1;
+      }
+      return 0;
+    });
+    return newUserRooms;
+  };
+
+  const handleChange = (value: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    setSelectedSortValue(value);
+    if (value === "ProjectName") {
+      setUserRooms((prevState) => sortProjectName(prevState, isAscendingOrder));
+    }
+    if (value === "Latest") {
+      setUserRooms((prevState) => sortCreatedAt(prevState, isAscendingOrder));
+    }
+  };
+
+  useEffect(() => {
+    if (selectedSortValue === "ProjectName") {
+      setUserRooms((prevState) => sortProjectName(prevState, isAscendingOrder));
+    }
+    if (selectedSortValue === "Latest") {
+      setUserRooms((prevState) => sortCreatedAt(prevState, isAscendingOrder));
+    }
+  }, [selectedSortValue, isAscendingOrder, setUserRooms]);
 
   const list = {
     visible: {
@@ -68,7 +148,7 @@ const DashboardPage = () => {
         <>
           <div className="w-screen flex flex-col items-center justify-center">
             <motion.div
-              className="my-4"
+              className="my-4 flex"
               initial={{ y: -200 }}
               animate={{ y: 0 }}
               transition={{ type: "spring", damping: 15, stiffness: 100, bounce: 0.2 }}
@@ -79,6 +159,28 @@ const DashboardPage = () => {
               <Button className="mx-4" color="grey">
                 Join Project
               </Button>
+              <div className="flex w-72 mx-4">
+                <Select
+                  label="Sort Projects"
+                  animate={{
+                    mount: { y: 0 },
+                    unmount: { y: 25 },
+                  }}
+                  onChange={handleChange}
+                >
+                  <Option value="Latest">Latest</Option>
+                  <Option value="ProjectName">Project Name</Option>
+                </Select>
+                <Button
+                  variant="outlined"
+                  color="grey"
+                  size="sm"
+                  disabled={selectedSortValue === ""}
+                  onClick={() => setIsAscendingOder((prevState) => !prevState)}
+                >
+                  {isAscendingOrder ? <HiSortAscending size={20} /> : <HiSortDescending size={20} />}
+                </Button>
+              </div>
             </motion.div>
             {userRooms && (
               <motion.div

@@ -42,7 +42,7 @@ const useGetRooms = () => {
     return unsubcribe;
   }, [authState.user]);
 
-  return { userRooms, isLoading };
+  return { userRooms, isLoading, setUserRooms };
 };
 
 export default useGetRooms;
