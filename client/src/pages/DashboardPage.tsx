@@ -163,7 +163,6 @@ const DashboardPage = () => {
               <div className="flex w-72 mx-4">
                 <Select
                   label="Sort Projects"
-                  defaultValue=""
                   value={selectedSortValue}
                   animate={{
                     mount: { y: 0 },
@@ -171,9 +170,6 @@ const DashboardPage = () => {
                   }}
                   onChange={handleChange}
                 >
-                  <Option value="dafault">
-                    <em />
-                  </Option>
                   <Option value="ProjectName">Project Name</Option>
                   <Option value="CreatedDate">Created Date</Option>
                 </Select>
