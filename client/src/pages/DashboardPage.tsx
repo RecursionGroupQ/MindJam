@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Button,
   Dialog,
@@ -42,7 +42,7 @@ const DashboardPage = () => {
     navigate(`/room/${roomId}`);
   };
 
-  // project名でソート
+  // Project名でソート
   const sortProjectName = (rooms: UserRoom[], isAscOrder: boolean) => {
     const newUserRooms = [...rooms];
     if (isAscOrder) {
@@ -96,25 +96,26 @@ const DashboardPage = () => {
     return newUserRooms;
   };
 
-  const handleChange = (value: any) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    setSelectedSortValue(value);
-    if (value === "ProjectName") {
-      setUserRooms((prevState) => sortProjectName(prevState, isAscendingOrder));
-    }
-    if (value === "Latest") {
-      setUserRooms((prevState) => sortCreatedAt(prevState, isAscendingOrder));
-    }
+  const sortProject = useCallback(
+    (value: string) => {
+      if (value === "ProjectName") {
+        setUserRooms((prevState) => sortProjectName(prevState, isAscendingOrder));
+      }
+      if (value === "CreatedDate") {
+        setUserRooms((prevState) => sortCreatedAt(prevState, isAscendingOrder));
+      }
+    },
+    [isAscendingOrder, setUserRooms]
+  );
+
+  const handleChange = (value: React.ReactNode) => {
+    setSelectedSortValue(value as string);
+    sortProject(value as string);
   };
 
   useEffect(() => {
-    if (selectedSortValue === "ProjectName") {
-      setUserRooms((prevState) => sortProjectName(prevState, isAscendingOrder));
-    }
-    if (selectedSortValue === "Latest") {
-      setUserRooms((prevState) => sortCreatedAt(prevState, isAscendingOrder));
-    }
-  }, [selectedSortValue, isAscendingOrder, setUserRooms]);
+    sortProject(selectedSortValue);
+  }, [selectedSortValue, sortProject]);
 
   const list = {
     visible: {
@@ -162,14 +163,19 @@ const DashboardPage = () => {
               <div className="flex w-72 mx-4">
                 <Select
                   label="Sort Projects"
+                  defaultValue=""
+                  value={selectedSortValue}
                   animate={{
                     mount: { y: 0 },
                     unmount: { y: 25 },
                   }}
                   onChange={handleChange}
                 >
-                  <Option value="Latest">Latest</Option>
+                  <Option value="dafault">
+                    <em />
+                  </Option>
                   <Option value="ProjectName">Project Name</Option>
+                  <Option value="CreatedDate">Created Date</Option>
                 </Select>
                 <Button
                   variant="outlined"

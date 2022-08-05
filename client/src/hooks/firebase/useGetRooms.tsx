@@ -31,6 +31,16 @@ const useGetRooms = () => {
             updatedAt: data.updatedAt,
           } as UserRoom);
         });
+        // アップデート日でソート
+        res.sort((a, b) => {
+          if (a.updatedAt < b.updatedAt) {
+            return 1;
+          }
+          if (a.updatedAt > b.updatedAt) {
+            return -1;
+          }
+          return 0;
+        });
         setUserRooms(res);
         setIsLoading(false);
       },
