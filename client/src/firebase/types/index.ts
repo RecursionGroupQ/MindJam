@@ -14,6 +14,7 @@ export type RoomsDocument = {
 export type UserRoom = {
   projectName: string;
   roomId: string;
+  ownerName: string | null;
   role: Roles;
   name: string;
   createdAt: Timestamp;

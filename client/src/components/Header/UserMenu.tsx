@@ -49,22 +49,22 @@ const UserMenu = () => {
           </motion.div>
         </div>
       </MenuHandler>
-      <MenuList>
+      <MenuList className="!min-w-[50px]">
         <MenuItem onClick={handleDarkMode}>
           {dark ? (
-            <div className="flex items-center">
+            <div className="flex justify-between items-center">
               Light
               <FaSun className="pl-2" size={20} />
             </div>
           ) : (
-            <div className="flex items-center">
+            <div className="flex justify-between items-center">
               Dark
               <FaMoon className="pl-2" size={20} />
             </div>
           )}
         </MenuItem>
         {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
-        <MenuItem onClick={() => logout()} className="flex">
+        <MenuItem onClick={() => logout()} className="flex justify-between items-center">
           Logout
           <svg
             fill="none"

@@ -10,7 +10,7 @@ import { RoomContext } from "../../context/RoomContext";
 
 const Header = () => {
   const { authState } = useContext(AuthContext);
-  const { dark, roomName } = useContext(RoomContext);
+  const { dark, roomName, roomId } = useContext(RoomContext);
   const { googleLogin } = useLogin();
 
   return (
@@ -32,15 +32,17 @@ const Header = () => {
           <span className={`ml-3 text-xl ${dark ? "text-white" : "text-black"}`}>Mindmap</span>
         </Link>
         {roomName && (
-          <motion.div
-            initial={{ y: -800 }}
-            animate={{ y: 0 }}
-            transition={{ type: "spring", damping: 15, stiffness: 100, bounce: 0.2 }}
-          >
-            <Card className="py-1 px-2" shadow>
-              <strong>{roomName}</strong>
-            </Card>
-          </motion.div>
+          <div className="absolute top-10 left-1/2" style={{ transform: "translate(-50%, -50%)" }}>
+            <motion.div
+              initial={{ y: -800 }}
+              animate={{ y: 0 }}
+              transition={{ type: "spring", damping: 15, stiffness: 100, bounce: 0.2 }}
+            >
+              <Card className="py-1 px-6 font-bold" shadow>
+                {roomName}
+              </Card>
+            </motion.div>
+          </div>
         )}
         {!authState.user ? (
           <Button
@@ -65,7 +67,7 @@ const Header = () => {
           </Button>
         ) : (
           <div className="flex items-center">
-            <RoomUsers />
+            {roomId && <RoomUsers />}
             <UserMenu />
           </div>
         )}

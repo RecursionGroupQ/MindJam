@@ -18,7 +18,7 @@ const useHistory = () => {
 
       if (currHistory.type === "add") {
         // handle delete for firebase
-        handleUndoAdd(currHistory);
+        handleUndoAdd(currHistory).catch((err) => console.log(err));
       } else {
         saveUpdatedNodes(updatedNodesToSave).catch((err) => console.log(err));
       }
@@ -37,7 +37,7 @@ const useHistory = () => {
 
       if (nextHistory.type === "delete") {
         // handle delete for firebase
-        handleRedoDelete(nextHistory);
+        handleRedoDelete(nextHistory).catch((err) => console.log(err));
       } else {
         saveUpdatedNodes(updatedNodesToSave).catch((err) => console.log(err));
       }

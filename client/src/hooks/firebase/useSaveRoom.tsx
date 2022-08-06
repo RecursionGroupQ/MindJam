@@ -1,4 +1,4 @@
-import { deleteField, doc, updateDoc } from "firebase/firestore";
+import { deleteField, doc, Timestamp, updateDoc } from "firebase/firestore";
 import { useContext } from "react";
 import { History, Node, RoomContext } from "../../context/RoomContext";
 import { db } from "../../firebase/config";
@@ -14,6 +14,9 @@ const useSaveRoom = () => {
         payload[`nodes.${node.id}`] = node;
       });
       await updateDoc(docRef, { ...payload });
+      await updateDoc(docRef, {
+        updatedAt: Timestamp.now(),
+      });
     }
   };
 
@@ -30,10 +33,13 @@ const useSaveRoom = () => {
           [`nodes.${node.id}`]: deleteField(),
         });
       });
+      await updateDoc(docRef, {
+        updatedAt: Timestamp.now(),
+      });
     }
   };
 
-  const handleUndoAdd = (currHistory: History) => {
+  const handleUndoAdd = async (currHistory: History) => {
     if (roomId && currHistory.diff) {
       const docRef = doc(db, "rooms", roomId);
       currHistory.diff.map(async (nodeId) => {
@@ -41,16 +47,22 @@ const useSaveRoom = () => {
           [`nodes.${nodeId}`]: deleteField(),
         });
       });
+      await updateDoc(docRef, {
+        updatedAt: Timestamp.now(),
+      });
     }
   };
 
-  const handleRedoDelete = (nextHistory: History) => {
+  const handleRedoDelete = async (nextHistory: History) => {
     if (roomId && nextHistory.diff) {
       const docRef = doc(db, "rooms", roomId);
       nextHistory.diff.map(async (nodeId) => {
         await updateDoc(docRef, {
           [`nodes.${nodeId}`]: deleteField(),
         });
+      });
+      await updateDoc(docRef, {
+        updatedAt: Timestamp.now(),
       });
     }
   };
