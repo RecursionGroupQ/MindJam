@@ -386,14 +386,15 @@ const RoomPage = () => {
                           {Array.from(nodes.keys()).map((key) => {
                             const currNode = nodes.get(key);
                             if (!currNode) return null;
-                            return currNode.children.map((childId) => {
-                              const currChild = nodes.get(childId);
+                            return currNode.children.map((child) => {
+                              const currChild = nodes.get(child.id);
                               if (!currChild) return null;
                               return (
                                 <Edge
-                                  key={`edge_${currNode.id}_${childId}`}
+                                  key={`edge_${currNode.id}_${child.id}`}
                                   node={currNode}
                                   currNodeChild={currChild}
+                                  color={child.color}
                                 />
                               );
                             });

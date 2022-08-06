@@ -12,9 +12,14 @@ type Props = {
   children: React.ReactNode;
 };
 
+export type Child = {
+  id: string;
+  color: string;
+};
+
 export type Node = {
   id: string;
-  children: string[];
+  children: Child[];
   parents: string[];
   text: string;
   shapeType: ShapeType;
@@ -108,9 +113,9 @@ export const RoomContextProvider: React.FC<Props> = ({ children }) => {
     stageY: 0,
   });
   const [stageStyle, setStageStyle] = useState<StageStyle>({
-    backgroundColor: "#f8fafc",
+    backgroundColor: "#e2e8f0",
     opacity: 0.8,
-    backgroundImage: "radial-gradient(#6b7280 1.1px, #f8fafc 1.1px)",
+    backgroundImage: "radial-gradient(#6b7280 1.1px, #e2e8f0 1.1px)",
     backgroundSize: `${50 * stageConfig.stageScale}px ${50 * stageConfig.stageScale}px`,
     backgroundPosition: "0px 0px",
   });

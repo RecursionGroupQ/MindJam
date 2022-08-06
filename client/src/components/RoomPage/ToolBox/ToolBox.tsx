@@ -29,20 +29,20 @@ const ToolBox = () => {
             if (parentNode) {
               const updatedParent = {
                 ...parentNode,
-                children: parentNode.children.filter((child) => child !== currNode.id),
+                children: parentNode.children.filter((child) => child.id !== currNode.id),
               };
               updatedNodes.set(parent, updatedParent);
               updatedNodesToSave.push(updatedParent);
             }
           });
           currNode.children.forEach((child) => {
-            const childNode = nodes.get(child);
+            const childNode = nodes.get(child.id);
             if (childNode) {
               const updatedChild = {
                 ...childNode,
                 parents: childNode.parents.filter((parent) => parent !== currNode.id),
               };
-              updatedNodes.set(child, updatedChild);
+              updatedNodes.set(child.id, updatedChild);
               updatedNodesToSave.push(updatedChild);
             }
           });
@@ -71,20 +71,20 @@ const ToolBox = () => {
               if (parentNode) {
                 const updatedParent = {
                   ...parentNode,
-                  children: parentNode.children.filter((child) => child !== currNode.id),
+                  children: parentNode.children.filter((child) => child.id !== currNode.id),
                 };
                 updatedNodes.set(parent, updatedParent);
                 updatedNodesToSave.push(updatedParent);
               }
             });
             currNode.children.forEach((child) => {
-              const childNode = updatedNodes.get(child);
+              const childNode = updatedNodes.get(child.id);
               if (childNode) {
                 const updatedChild = {
                   ...childNode,
                   parents: childNode.parents.filter((parent) => parent !== currNode.id),
                 };
-                updatedNodes.set(child, updatedChild);
+                updatedNodes.set(child.id, updatedChild);
                 updatedNodesToSave.push(updatedChild);
               }
             });

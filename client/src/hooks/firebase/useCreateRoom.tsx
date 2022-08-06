@@ -17,7 +17,12 @@ const defaultNodes: Record<string, Node> = {
     height: 132.82849502281758,
     y: 391.25000000000034,
     shapeType: "rect",
-    children: ["-AT-kH8pJ6X_E0fMx7VAP"],
+    children: [
+      {
+        id: "-AT-kH8pJ6X_E0fMx7VAP",
+        color: "#000",
+      },
+    ],
     width: 379.9999999999999,
     text: '{"blocks":[{"key":"e3jkh","text":"","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"2fe8h","text":"CLICK ON 2 DIFFERENT NODES TO CONNECT","type":"unstyled","depth":0,"inlineStyleRanges":[{"offset":0,"length":37,"style":"fontsize-30"}],"entityRanges":[],"data":{}}],"entityMap":{}}',
     fillStyle: "#eab308",
@@ -27,8 +32,13 @@ const defaultNodes: Record<string, Node> = {
     fillStyle: "#fff",
     height: 188.2165438513168,
     id: "-AT-kH8pJ6X_E0fMx7VAP",
-    strokeStyle: "#000000",
-    children: ["C6ntU1q9WMKosAXfncIix"],
+    strokeStyle: "#000",
+    children: [
+      {
+        id: "C6ntU1q9WMKosAXfncIix",
+        color: "#000",
+      },
+    ],
     parents: ["um1E66ra5rgDx0Evi6ICG"],
     width: 379.9999999999996,
     y: 542.5000000000007,

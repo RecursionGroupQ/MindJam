@@ -9,15 +9,16 @@ import useSocket from "../../hooks/useSocket";
 type Props = {
   node: Node;
   currNodeChild: Node;
+  color: string;
 };
 
-const Edge: React.FC<Props> = ({ node, currNodeChild }) => {
+const Edge: React.FC<Props> = ({ node, currNodeChild, color }) => {
   const RADIUS = 50;
   const SVG =
     '<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="#fff" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
   const IMG_URL = `data:image/svg+xml;base64,${window.btoa(SVG)}`;
 
-  const { nodes, setNodes, stageRef, dark } = useContext(RoomContext);
+  const { nodes, setNodes, stageRef } = useContext(RoomContext);
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [buttonHover, setButtonHover] = useState(false);
   const [edgeDeleteBtn] = useImage(IMG_URL);
@@ -35,7 +36,7 @@ const Edge: React.FC<Props> = ({ node, currNodeChild }) => {
       if (currNode && childNode) {
         const updatedCurrNode = {
           ...currNode,
-          children: currNode.children.filter((child) => child !== currNodeChild.id),
+          children: currNode.children.filter((child) => child.id !== currNodeChild.id),
         };
         updatedNodes.set(currNode.id, updatedCurrNode);
         const updatedChildNode = {
@@ -120,9 +121,9 @@ const Edge: React.FC<Props> = ({ node, currNodeChild }) => {
           context.lineTo(points[1].x, points[1].y);
           context.fillStrokeShape(shape);
         }}
-        stroke={dark ? "#f8fafc" : "#1E293B"}
+        stroke={color}
         strokeWidth={isMouseOver ? 6 : 4}
-        dash={[8, 4]}
+        // dash={[8, 4]}
       />
       {isMouseOver && (
         <Image
