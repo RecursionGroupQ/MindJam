@@ -1,15 +1,5 @@
 import React, { useState } from "react";
-import {
-  Button,
-  Dialog,
-  DialogBody,
-  DialogFooter,
-  Input,
-  Card,
-  CardBody,
-  CardFooter,
-  Typography,
-} from "@material-tailwind/react";
+import { Button, Input, Card, CardBody, CardFooter, Typography } from "@material-tailwind/react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Oval } from "react-loader-spinner";
@@ -17,11 +7,14 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 import { motion } from "framer-motion";
 import useCreateRoom from "../hooks/firebase/useCreateRoom";
 import useGetRooms from "../hooks/firebase/useGetRooms";
+import Modal from "../components/Modal";
 
 const DashboardPage = () => {
   const { createRoom, isLoading: createRoomIsLoading } = useCreateRoom();
-  const [openDialog, setOpenDialog] = useState(false);
+  const [createModalIsOpen, setCreateModalIsOpen] = useState(false);
+  const [joinModalIsOpen, setJoinModalIsOpen] = useState(false);
   const [projectName, setProjectName] = useState<string>("");
+  const [joinRoomId, setJoinRoomId] = useState<string>("");
   const { userRooms, isLoading: userRoomsIsLoading } = useGetRooms();
   const navigate = useNavigate();
 
@@ -30,7 +23,20 @@ const DashboardPage = () => {
     createRoom(projectName).catch((err) => toast.error((err as Error).message));
   };
 
-  const handleOpen = () => setOpenDialog(!openDialog);
+  const handleJoinRoomSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    navigate(`/room/${joinRoomId}`);
+  };
+
+  const handleCreateModalOpen = () => {
+    setJoinModalIsOpen(false);
+    setCreateModalIsOpen(!createModalIsOpen);
+  };
+
+  const handleJoinModalOpen = () => {
+    setCreateModalIsOpen(false);
+    setJoinModalIsOpen(!joinModalIsOpen);
+  };
 
   const handleClick = (roomId: string) => {
     navigate(`/room/${roomId}`);
@@ -68,15 +74,15 @@ const DashboardPage = () => {
         <>
           <div className="w-screen flex flex-col items-center justify-center">
             <motion.div
-              className="my-4"
+              className="my-4 w-96 flex justify-center"
               initial={{ y: -200 }}
               animate={{ y: 0 }}
               transition={{ type: "spring", damping: 15, stiffness: 100, bounce: 0.2 }}
             >
-              <Button className="mx-4" color="green" onClick={handleOpen}>
+              <Button fullWidth className="mx-4" color="green" onClick={handleCreateModalOpen}>
                 Create Project
               </Button>
-              <Button className="mx-4" color="grey">
+              <Button fullWidth className="mx-4" color="blue-grey" onClick={handleJoinModalOpen}>
                 Join Project
               </Button>
             </motion.div>
@@ -99,17 +105,35 @@ const DashboardPage = () => {
                     onClick={() => handleClick(doc.roomId)}
                   >
                     <Card shadow className="w-96 m-4">
-                      <BsThreeDotsVertical className="relative" />
-                      <CardBody className="text-center">
+                      <div className="flex justify-end p-2">{doc.role === "owner" && <BsThreeDotsVertical />}</div>
+                      <CardBody className="text-center !pt-2">
                         <Typography variant="h4" className="text-center">
                           {doc.projectName}
                         </Typography>
                       </CardBody>
                       <CardFooter divider className="flex items-center justify-between !px-6 !py-1">
-                        <Typography variant="small">{doc.createdAt.toDate().toUTCString()}</Typography>
-                        <span className="bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800">
-                          {doc.role}
-                        </span>
+                        <div className="flex flex-col">
+                          <Typography variant="small">
+                            <span className="font-bold">last modified:</span> {doc.updatedAt.toDate().toDateString()}
+                          </Typography>
+                          <Typography variant="small">
+                            <span className="font-bold">created:</span> {doc.createdAt.toDate().toDateString()}
+                          </Typography>
+                          {doc.role !== "owner" && (
+                            <Typography variant="small">
+                              <span className="font-bold">owner:</span> {doc.ownerName}
+                            </Typography>
+                          )}
+                        </div>
+                        {doc.role === "owner" ? (
+                          <span className="bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800">
+                            {doc.role}
+                          </span>
+                        ) : (
+                          <span className="bg-pink-100 text-pink-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-pink-200 dark:text-pink-900">
+                            {doc.role}
+                          </span>
+                        )}
                       </CardFooter>
                     </Card>
                   </motion.div>
@@ -117,26 +141,50 @@ const DashboardPage = () => {
               </motion.div>
             )}
           </div>
-          <Dialog open={openDialog} handler={handleOpen}>
-            <form onSubmit={handleSubmit}>
-              <DialogBody divider>
-                <Input
-                  label="name your project"
-                  required
-                  value={projectName}
-                  onChange={(e) => setProjectName(e.target.value)}
-                />
-              </DialogBody>
-              <DialogFooter>
-                <Button variant="text" color="red" onClick={handleOpen} className="mr-1">
-                  <span>Cancel</span>
-                </Button>
-                <Button type="submit" variant="gradient" color="green" disabled={createRoomIsLoading}>
-                  <span>Create Room</span>
-                </Button>
-              </DialogFooter>
-            </form>
-          </Dialog>
+          <Modal modalIsOpen={createModalIsOpen}>
+            <Card shadow>
+              <form onSubmit={handleSubmit}>
+                <CardBody className="w-96">
+                  <Input
+                    label="Name your project..."
+                    required
+                    value={projectName}
+                    onChange={(e) => setProjectName(e.target.value)}
+                  />
+                </CardBody>
+                <CardFooter className="flex justify-between !pt-1">
+                  <Button fullWidth className="mx-3" color="blue-grey" onClick={handleCreateModalOpen}>
+                    Cancel
+                  </Button>
+                  <Button fullWidth type="submit" className="mx-3" color="green" disabled={createRoomIsLoading}>
+                    Create
+                  </Button>
+                </CardFooter>
+              </form>
+            </Card>
+          </Modal>
+          <Modal modalIsOpen={joinModalIsOpen}>
+            <Card shadow>
+              <form onSubmit={handleJoinRoomSubmit}>
+                <CardBody className="w-96">
+                  <Input
+                    label="Enter room key..."
+                    required
+                    value={joinRoomId}
+                    onChange={(e) => setJoinRoomId(e.target.value)}
+                  />
+                </CardBody>
+                <CardFooter className="flex justify-between !pt-1">
+                  <Button fullWidth className="mx-3" color="blue-grey" onClick={handleJoinModalOpen}>
+                    Cancel
+                  </Button>
+                  <Button fullWidth type="submit" className="mx-3" color="green">
+                    Join
+                  </Button>
+                </CardFooter>
+              </form>
+            </Card>
+          </Modal>
         </>
       )}
     </>

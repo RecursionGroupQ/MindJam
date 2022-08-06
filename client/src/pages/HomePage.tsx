@@ -3,6 +3,7 @@ import { AuthContext } from "../context/AuthContext";
 
 const HomePage = () => {
   const { authState } = useContext(AuthContext);
+
   return (
     <div>
       {authState?.user?.displayName}
