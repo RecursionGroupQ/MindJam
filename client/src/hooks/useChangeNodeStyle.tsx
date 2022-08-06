@@ -83,6 +83,54 @@ const useChangeNodeStyle = () => {
       }
       setStrokeStyle(color);
     } else if (value === "line") {
+      if (selectedNode) {
+        const currChildren = selectedNode.children;
+        if (currChildren) {
+          setNodes((prevState) => {
+            const updatedNodes = new Map(prevState);
+            const currNode = nodes.get(selectedNode.id);
+            if (!currNode) return prevState;
+            const updatedChildren = currChildren.map((child) => ({ ...child, color }));
+            const updatedNode = {
+              ...currNode,
+              children: updatedChildren,
+            };
+            updatedNodes.set(currNode.id, updatedNode);
+            saveUpdatedNodes([updatedNode]).catch((err) => console.log(err));
+            updateRoom([updatedNode], "update");
+            return updatedNodes;
+          });
+        }
+        const currParents = selectedNode.parents;
+        if (currParents) {
+          setNodes((prevState) => {
+            const updatedNodesToSave: Node[] = [];
+            const updatedNodes = new Map(prevState);
+            const currNode = nodes.get(selectedNode.id);
+            if (!currNode) return prevState;
+            currParents.forEach((parent) => {
+              const currParent = nodes.get(parent);
+              if (currParent && currParent.children) {
+                const updatedParentChildren = currParent.children.map((child) => {
+                  if (child.id === currNode.id) {
+                    return { ...child, color };
+                  }
+                  return child;
+                });
+                const updatedParent = {
+                  ...currParent,
+                  children: updatedParentChildren,
+                };
+                updatedNodes.set(currParent.id, updatedParent);
+                updatedNodesToSave.push(updatedParent);
+              }
+            });
+            saveUpdatedNodes(updatedNodesToSave).catch((err) => console.log(err));
+            updateRoom(updatedNodesToSave, "update");
+            return updatedNodes;
+          });
+        }
+      }
       setLineStyle(color);
     }
   };

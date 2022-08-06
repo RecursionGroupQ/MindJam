@@ -1,8 +1,13 @@
 type ShapeType = "rect" | "ellipse" | "polygon";
 
+export type Child = {
+  id: string;
+  color: string;
+};
+
 export type Node = {
   id: string;
-  children: string[];
+  children: Child[];
   parents: string[];
   text: string;
   shapeType: ShapeType;

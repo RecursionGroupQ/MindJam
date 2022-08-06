@@ -36,7 +36,7 @@ export type GetUserMouseUpdatePayload = {
   userCursor: UserCursor;
 };
 
-const WS = process.env.REACT_APP_SERVER_HOST as string;
+const WS = process.env.REACT_APP_SERVER_HOST || "http://localhost:8080";
 
 export const SocketContext = createContext<ISocketContext>({} as ISocketContext);
 

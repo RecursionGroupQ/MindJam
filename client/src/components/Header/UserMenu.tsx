@@ -22,8 +22,8 @@ const UserMenu = () => {
     } else {
       setStageStyle((prevState) => ({
         ...prevState,
-        backgroundColor: "#f8fafc",
-        backgroundImage: "radial-gradient(#6b7280 1.1px, #f8fafc 1.1px)",
+        backgroundColor: "#e2e8f0",
+        backgroundImage: "radial-gradient(#6b7280 1.1px, #e2e8f0 1.1px)",
       }));
       setDark(false);
     }

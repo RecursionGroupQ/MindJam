@@ -15,7 +15,7 @@ type Props = {
 };
 
 const Shape: React.FC<Props> = ({ node }) => {
-  const { nodes, setNodes, selectedNode, setSelectedNode, selectedShapes, setSelectedShapes, stageRef } =
+  const { nodes, setNodes, selectedNode, setSelectedNode, selectedShapes, setSelectedShapes, stageRef, lineStyle } =
     useContext(RoomContext);
   const shapeRef = useRef<Konva.Group>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -91,13 +91,13 @@ const Shape: React.FC<Props> = ({ node }) => {
         if (
           currNode &&
           selectNode &&
-          !currNode.children.includes(selectedNode.id) &&
-          !selectNode.children.includes(currNode.id) &&
+          !currNode.children.some((child) => child.id === selectedNode.id) &&
+          !selectNode.children.some((child) => child.id === currNode.id) &&
           selectedNode.id !== currNode.id
         ) {
           const updatedSelectNode = {
             ...selectNode,
-            children: [...selectNode.children, currNode.id],
+            children: [...selectNode.children, { id: currNode.id, color: lineStyle }],
           };
           prevState.set(selectedNode.id, updatedSelectNode);
           const updatedCurrNode = {
