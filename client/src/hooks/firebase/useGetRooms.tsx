@@ -33,7 +33,16 @@ const useGetRooms = () => {
             updatedAt: data.updatedAt,
           } as UserRoom);
         });
-        res.sort((a, b) => b.updatedAt.toDate().getTime() - a.updatedAt.toDate().getTime());
+        // アップデート日でソート
+        res.sort((a, b) => {
+          if (a.updatedAt < b.updatedAt) {
+            return 1;
+          }
+          if (a.updatedAt > b.updatedAt) {
+            return -1;
+          }
+          return 0;
+        });
         setUserRooms(res);
         setIsLoading(false);
       },
@@ -45,7 +54,7 @@ const useGetRooms = () => {
     return unsubcribe;
   }, [authState.user]);
 
-  return { userRooms, isLoading };
+  return { userRooms, isLoading, setUserRooms };
 };
 
 export default useGetRooms;

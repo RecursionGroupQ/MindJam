@@ -1,21 +1,26 @@
-import React, { useState } from "react";
-import { Button, Input, Card, CardBody, CardFooter, Typography } from "@material-tailwind/react";
+import React, { useCallback, useState } from "react";
+import { Button, Input, Card, CardBody, CardFooter, Select, Option } from "@material-tailwind/react";
+import { HiSortAscending, HiSortDescending } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Oval } from "react-loader-spinner";
-import { BsThreeDotsVertical } from "react-icons/bs";
 import { motion } from "framer-motion";
 import useCreateRoom from "../hooks/firebase/useCreateRoom";
 import useGetRooms from "../hooks/firebase/useGetRooms";
+import { UserRoom } from "../firebase/types";
 import Modal from "../components/Modal";
+import RoomCard from "../components/Dashboard/RoomCard";
 
 const DashboardPage = () => {
   const { createRoom, isLoading: createRoomIsLoading } = useCreateRoom();
   const [createModalIsOpen, setCreateModalIsOpen] = useState(false);
   const [joinModalIsOpen, setJoinModalIsOpen] = useState(false);
   const [projectName, setProjectName] = useState<string>("");
+  const { userRooms, setUserRooms, isLoading: userRoomsIsLoading } = useGetRooms();
+  const [filteredRooms, setFilteredRooms] = useState<UserRoom[] | null>(null);
+  const [selectedSortValue, setSelectedSortValue] = useState<string>("");
+  const [isAscendingOrder, setIsAscendingOder] = useState<boolean>(true);
   const [joinRoomId, setJoinRoomId] = useState<string>("");
-  const { userRooms, isLoading: userRoomsIsLoading } = useGetRooms();
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -38,8 +43,125 @@ const DashboardPage = () => {
     setJoinModalIsOpen(!joinModalIsOpen);
   };
 
-  const handleClick = (roomId: string) => {
-    navigate(`/room/${roomId}`);
+  // Project名でソート
+  const sortProjectName = (rooms: UserRoom[], isAscOrder: boolean) => {
+    const newUserRooms = [...rooms];
+    if (isAscOrder) {
+      newUserRooms.sort((a, b) => {
+        if (a.projectName > b.projectName) {
+          return 1;
+        }
+        if (a.projectName < b.projectName) {
+          return -1;
+        }
+        return 0;
+      });
+      return newUserRooms;
+    }
+    newUserRooms.sort((a, b) => {
+      if (a.projectName < b.projectName) {
+        return 1;
+      }
+      if (a.projectName > b.projectName) {
+        return -1;
+      }
+      return 0;
+    });
+    return newUserRooms;
+  };
+
+  // 作成日でソート
+  const sortCreatedAt = (rooms: UserRoom[], isAscOrder: boolean) => {
+    const newUserRooms = [...rooms];
+    if (isAscOrder) {
+      newUserRooms.sort((a, b) => {
+        if (a.createdAt > b.createdAt) {
+          return 1;
+        }
+        if (a.createdAt < b.createdAt) {
+          return -1;
+        }
+        return 0;
+      });
+      return newUserRooms;
+    }
+    newUserRooms.sort((a, b) => {
+      if (a.createdAt < b.createdAt) {
+        return 1;
+      }
+      if (a.createdAt > b.createdAt) {
+        return -1;
+      }
+      return 0;
+    });
+    return newUserRooms;
+  };
+
+  // 作成日でソート
+  const sortUpdatedAt = (rooms: UserRoom[], isAscOrder: boolean) => {
+    const newUserRooms = [...rooms];
+    if (isAscOrder) {
+      newUserRooms.sort((a, b) => {
+        if (a.updatedAt > b.updatedAt) {
+          return 1;
+        }
+        if (a.updatedAt < b.updatedAt) {
+          return -1;
+        }
+        return 0;
+      });
+      return newUserRooms;
+    }
+    newUserRooms.sort((a, b) => {
+      if (a.updatedAt < b.updatedAt) {
+        return 1;
+      }
+      if (a.updatedAt > b.updatedAt) {
+        return -1;
+      }
+      return 0;
+    });
+    return newUserRooms;
+  };
+
+  const filterRooms = useCallback(
+    (value: "MyProjects" | "JoinedProjects") => {
+      let newUserRooms: UserRoom[] = [];
+      if (value === "MyProjects") {
+        newUserRooms = userRooms.filter((room) => room.role === "owner");
+      }
+      if (value === "JoinedProjects") {
+        newUserRooms = userRooms.filter((room) => room.role === "editor");
+      }
+      return newUserRooms;
+    },
+    [userRooms]
+  );
+
+  const sortProject = useCallback(
+    (value: string, isAscending: boolean) => {
+      if (value === "ProjectName") {
+        setFilteredRooms(null);
+        setUserRooms((prevState) => sortProjectName(prevState, isAscending));
+      }
+      if (value === "CreatedDate") {
+        setFilteredRooms(null);
+        setUserRooms((prevState) => sortCreatedAt(prevState, isAscending));
+      }
+      if (value === "UpdatedDate") {
+        setFilteredRooms(null);
+        setUserRooms((prevState) => sortUpdatedAt(prevState, isAscending));
+      }
+      if (value === "MyProjects" || value === "JoinedProjects") {
+        setFilteredRooms(filterRooms(value));
+      }
+    },
+    [setUserRooms, filterRooms]
+  );
+
+  const handleChange = (value: React.ReactNode) => {
+    setSelectedSortValue(value as string);
+    sortProject(value as string, isAscendingOrder);
   };
 
   const list = {
@@ -58,11 +180,6 @@ const DashboardPage = () => {
     },
   };
 
-  const item = {
-    visible: { opacity: 1, x: 0 },
-    hidden: { opacity: 0, x: -100 },
-  };
-
   return (
     <>
       {userRoomsIsLoading && (
@@ -74,7 +191,7 @@ const DashboardPage = () => {
         <>
           <div className="w-screen flex flex-col items-center justify-center">
             <motion.div
-              className="my-4 w-96 flex justify-center"
+              className="my-4 w-96 flex"
               initial={{ y: -200 }}
               animate={{ y: 0 }}
               transition={{ type: "spring", damping: 15, stiffness: 100, bounce: 0.2 }}
@@ -86,6 +203,48 @@ const DashboardPage = () => {
                 Join Project
               </Button>
             </motion.div>
+            <motion.div
+              className="my-4 flex justify-end"
+              initial={{ y: -200 }}
+              animate={{ y: 0 }}
+              transition={{ type: "spring", damping: 15, stiffness: 100, bounce: 0.2 }}
+            >
+              <div className="flex w-72 mx-4">
+                <Select
+                  label="Sort Projects"
+                  value={selectedSortValue}
+                  animate={{
+                    mount: { y: 0 },
+                    unmount: { y: 25 },
+                  }}
+                  onChange={handleChange}
+                >
+                  <Option value="ProjectName">Project Name</Option>
+                  <Option value="UpdatedDate">Updated Date</Option>
+                  <Option value="CreatedDate">Created Date</Option>
+                  <Option value="MyProjects">My Projects</Option>
+                  <Option value="JoinedProjects">Joined Projects</Option>
+                </Select>
+                <Button
+                  variant="outlined"
+                  color="grey"
+                  size="sm"
+                  disabled={
+                    selectedSortValue === "" ||
+                    selectedSortValue === "MyProjects" ||
+                    selectedSortValue === "JoinedProjects"
+                  }
+                  onClick={() =>
+                    setIsAscendingOder((prevState) => {
+                      sortProject(selectedSortValue, !prevState);
+                      return !prevState;
+                    })
+                  }
+                >
+                  {isAscendingOrder ? <HiSortAscending size={20} /> : <HiSortDescending size={20} />}
+                </Button>
+              </div>
+            </motion.div>
             {userRooms && (
               <motion.div
                 initial="hidden"
@@ -93,51 +252,9 @@ const DashboardPage = () => {
                 variants={list}
                 className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
               >
-                {userRooms.map((doc) => (
-                  <motion.div
-                    key={doc.roomId}
-                    variants={item}
-                    whileHover={{
-                      cursor: "pointer",
-                      scale: 1.05,
-                      transition: { duration: 0.3 },
-                    }}
-                    onClick={() => handleClick(doc.roomId)}
-                  >
-                    <Card shadow className="w-96 m-4">
-                      <div className="flex justify-end p-2">{doc.role === "owner" && <BsThreeDotsVertical />}</div>
-                      <CardBody className="text-center !pt-2">
-                        <Typography variant="h4" className="text-center">
-                          {doc.projectName}
-                        </Typography>
-                      </CardBody>
-                      <CardFooter divider className="flex items-center justify-between !px-6 !py-1">
-                        <div className="flex flex-col">
-                          <Typography variant="small">
-                            <span className="font-bold">last modified:</span> {doc.updatedAt.toDate().toDateString()}
-                          </Typography>
-                          <Typography variant="small">
-                            <span className="font-bold">created:</span> {doc.createdAt.toDate().toDateString()}
-                          </Typography>
-                          {doc.role !== "owner" && (
-                            <Typography variant="small">
-                              <span className="font-bold">owner:</span> {doc.ownerName}
-                            </Typography>
-                          )}
-                        </div>
-                        {doc.role === "owner" ? (
-                          <span className="bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800">
-                            {doc.role}
-                          </span>
-                        ) : (
-                          <span className="bg-pink-100 text-pink-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-pink-200 dark:text-pink-900">
-                            {doc.role}
-                          </span>
-                        )}
-                      </CardFooter>
-                    </Card>
-                  </motion.div>
-                ))}
+                {!filteredRooms
+                  ? userRooms.map((doc) => <RoomCard key={doc.roomId} doc={doc} />)
+                  : filteredRooms.map((doc) => <RoomCard key={doc.roomId} doc={doc} />)}
               </motion.div>
             )}
           </div>
