@@ -22,15 +22,18 @@ const useGetRooms = () => {
         const res: UserRoom[] = [];
         snapshot.docs.forEach((doc) => {
           const data = doc.data() as RoomsDocument;
+          const ownerUser = Object.values(data.roles).filter((user) => user.role === "owner")[0];
           res.push({
             projectName: data.projectName,
             roomId: doc.id,
+            ownerName: ownerUser.name,
             role: data.roles[uid].role,
             name: data.roles[uid].name,
             createdAt: data.createdAt,
             updatedAt: data.updatedAt,
           } as UserRoom);
         });
+        res.sort((a, b) => b.updatedAt.toDate().getTime() - a.updatedAt.toDate().getTime());
         setUserRooms(res);
         setIsLoading(false);
       },
