@@ -54,9 +54,29 @@ const Shape: React.FC<Props> = ({ node }) => {
 
   const handleDragEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
     setNodes((prevState) => {
-      const { x, y } = e.target.position();
+      let { x, y } = e.target.position();
       const currNode = prevState.get(node.id);
       if (!currNode) return prevState;
+      if (currNode.parents.length > 0) {
+        currNode.parents.forEach((parent) => {
+          const currParent = nodes.get(parent);
+          if (currParent && Math.abs(currParent.x - x) < 30) {
+            x = currParent.x;
+          } else if (currParent && Math.abs(currParent.y - y) < 30) {
+            y = currParent.y;
+          }
+        });
+      }
+      if (currNode.children.length > 0) {
+        currNode.children.forEach((child) => {
+          const currChild = nodes.get(child.id);
+          if (currChild && Math.abs(currChild.x - x) < 30) {
+            x = currChild.x;
+          } else if (currChild && Math.abs(currChild.y - y) < 30) {
+            y = currChild.y;
+          }
+        });
+      }
       const updatedNode = {
         ...currNode,
         x,
@@ -68,6 +88,7 @@ const Shape: React.FC<Props> = ({ node }) => {
         diff: null,
         nodes: prevState,
       });
+      updateRoom([updatedNode], "update");
       saveUpdatedNodes([updatedNode]).catch((err) => console.log(err));
       return new Map(prevState);
     });
@@ -195,7 +216,6 @@ const Shape: React.FC<Props> = ({ node }) => {
       <Text node={node} isEditing={isEditing} onToggleEdit={onToggleEdit} />
       {node.shapeType === "rect" && <RectShape node={node} />}
       {node.shapeType === "ellipse" && <EllipseShape node={node} />}
-      {/* <RegularPolygon sides={10} radius={70} fill="red" stroke="black" /> */}
       {node.shapeType === "polygon" && <PolygonShape node={node} />}
     </Group>
   );

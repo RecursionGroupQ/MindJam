@@ -1,5 +1,6 @@
 import { useContext } from "react";
 import { getDoc, updateDoc, doc } from "firebase/firestore";
+import { toast } from "react-toastify";
 import { AuthContext } from "../../context/AuthContext";
 import { RoomsDocument } from "../../firebase/types";
 import { db } from "../../firebase/config";
@@ -21,7 +22,7 @@ const useRenameRoom = () => {
         await updateDoc(docRef, { projectName: newProjectName });
       }
     } catch (error) {
-      console.log((error as Error).message);
+      toast.error((error as Error).message);
     }
   };
 
