@@ -10,8 +10,10 @@ import {
   MenuItem,
   Button,
   MenuList,
+  Input,
 } from "@material-tailwind/react";
 import { BsThreeDotsVertical } from "react-icons/bs";
+import { MdOutlineDriveFileRenameOutline } from "react-icons/md";
 import { FaTrash } from "react-icons/fa";
 import { FiLogOut } from "react-icons/fi";
 import { motion } from "framer-motion";
@@ -21,6 +23,7 @@ import { UserRoom } from "../../firebase/types";
 import useDeleteRoom from "../../hooks/firebase/useDeleteRoom";
 import useLeaveRoom from "../../hooks/firebase/useLeaveRoom";
 import Modal from "../Modal";
+import useRenameRoom from "../../hooks/firebase/useRenameRoom";
 
 type Props = {
   doc: UserRoom;
@@ -30,8 +33,11 @@ const RoomCard: React.FC<Props> = ({ doc }) => {
   const navigate = useNavigate();
   const { deleteRoom } = useDeleteRoom();
   const { leaveRoom } = useLeaveRoom();
+  const { renameRoom } = useRenameRoom();
   const [deleteConfirmModalIsOpen, setDeleteConfirmModalIsOpen] = useState(false);
   const [leaveConfirmModalIsOpen, setLeaveConfirmModalIsOpen] = useState(false);
+  const [renameConfirmModalIsOpen, setRenameConfirmModalIsOpen] = useState(false);
+  const [renamedProjectName, setRenamedProjectName] = useState(doc.projectName);
 
   const handleDeleteSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,6 +47,12 @@ const RoomCard: React.FC<Props> = ({ doc }) => {
   const handleLeaveSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     leaveRoom(doc.roomId).catch((err) => toast.error((err as Error).message));
+  };
+
+  const handleRenameSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    renameRoom(doc.roomId, renamedProjectName).catch((err) => toast.error((err as Error).message));
+    setRenameConfirmModalIsOpen(!renameConfirmModalIsOpen);
   };
 
   const handleClick = (roomId: string) => {
@@ -53,6 +65,15 @@ const RoomCard: React.FC<Props> = ({ doc }) => {
 
   const handleLeaveConfirmModalIsOpen = () => {
     setLeaveConfirmModalIsOpen(!leaveConfirmModalIsOpen);
+  };
+
+  const handleRenameConfirmModalIsOpen = () => {
+    setRenameConfirmModalIsOpen(!renameConfirmModalIsOpen);
+  };
+
+  const handleRenameCancel = () => {
+    handleRenameConfirmModalIsOpen();
+    setRenamedProjectName(doc.projectName);
   };
 
   const item = {
@@ -81,9 +102,14 @@ const RoomCard: React.FC<Props> = ({ doc }) => {
               </MenuHandler>
               <MenuList className="!min-w-[50px]">
                 {doc.role === "owner" ? (
-                  <MenuItem className="flex justify-between items-center" onClick={handleDeleteConfirmModalIsOpen}>
-                    Delete <FaTrash className="ml-2" />
-                  </MenuItem>
+                  <>
+                    <MenuItem className="flex justify-between items-center" onClick={handleRenameConfirmModalIsOpen}>
+                      Rename <MdOutlineDriveFileRenameOutline className="ml-2" />
+                    </MenuItem>
+                    <MenuItem className="flex justify-between items-center" onClick={handleDeleteConfirmModalIsOpen}>
+                      Delete <FaTrash className="ml-2" />
+                    </MenuItem>
+                  </>
                 ) : (
                   <MenuItem className="flex justify-between items-center" onClick={handleLeaveConfirmModalIsOpen}>
                     Leave <FiLogOut className="ml-2" />
@@ -154,6 +180,28 @@ const RoomCard: React.FC<Props> = ({ doc }) => {
               </Button>
               <Button fullWidth type="submit" className="mx-3" color="red">
                 Leave
+              </Button>
+            </CardFooter>
+          </form>
+        </Card>
+      </Modal>
+      <Modal modalIsOpen={renameConfirmModalIsOpen}>
+        <Card shadow>
+          <form onSubmit={handleRenameSubmit}>
+            <CardBody className="text-center w-96">
+              <Input
+                label="Rename your project..."
+                required
+                value={renamedProjectName}
+                onChange={(e) => setRenamedProjectName(e.target.value)}
+              />
+            </CardBody>
+            <CardFooter className="flex justify-between !pt-1">
+              <Button fullWidth className="mx-3" color="blue-grey" onClick={handleRenameCancel}>
+                Cancel
+              </Button>
+              <Button fullWidth type="submit" className="mx-3" color="green">
+                Rename
               </Button>
             </CardFooter>
           </form>
