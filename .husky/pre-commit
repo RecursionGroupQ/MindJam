@@ -1,0 +1,10 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# lint client
+cd client
+npm run lint-client
+
+# lint server
+cd .. && cd server
+npm run lint-server
