@@ -1,5 +1,6 @@
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useContext } from "react";
+import { toast } from "react-toastify";
 import { AuthContext } from "../context/AuthContext";
 import { auth } from "../firebase/config";
 
@@ -13,9 +14,8 @@ const useLogin = () => {
       if (res) {
         dispatch({ type: "LOGIN", payload: res });
       }
-      console.log(res);
     } catch (error) {
-      console.log((error as Error).message);
+      toast.error((error as Error).message);
     }
   };
 

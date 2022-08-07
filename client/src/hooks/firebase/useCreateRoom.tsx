@@ -66,7 +66,6 @@ const useCreateRoom = () => {
   const navigate = useNavigate();
 
   const createRoom = async (projectName: string) => {
-    console.log("create room");
     try {
       setIsLoading(true);
       const roomId = uuidv4();
@@ -82,7 +81,7 @@ const useCreateRoom = () => {
         await setDoc(docRef, payload);
       }
       navigate(`/room/${roomId}`);
-      toast.success("new room created!");
+      toast.info("share to start collaborating!");
       setIsLoading(false);
     } catch (error) {
       toast.error((error as Error).message);

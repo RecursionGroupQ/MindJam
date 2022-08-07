@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Button, Input, Card, CardBody, CardFooter, Select, Option } from "@material-tailwind/react";
 import { HiSortAscending, HiSortDescending } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
@@ -16,12 +16,16 @@ const DashboardPage = () => {
   const [createModalIsOpen, setCreateModalIsOpen] = useState(false);
   const [joinModalIsOpen, setJoinModalIsOpen] = useState(false);
   const [projectName, setProjectName] = useState<string>("");
-  const { userRooms, setUserRooms, isLoading: userRoomsIsLoading } = useGetRooms();
+  const { userRooms, getRooms, setUserRooms, isLoading: userRoomsIsLoading } = useGetRooms();
   const [filteredRooms, setFilteredRooms] = useState<UserRoom[] | null>(null);
   const [selectedSortValue, setSelectedSortValue] = useState<string>("");
   const [isAscendingOrder, setIsAscendingOder] = useState<boolean>(true);
   const [joinRoomId, setJoinRoomId] = useState<string>("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    getRooms().catch((err) => toast.error((err as Error).message));
+  }, [getRooms]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,6 +38,10 @@ const DashboardPage = () => {
   };
 
   const handleCreateModalOpen = () => {
+    if (userRooms.filter((room) => room.role === "owner").length >= 9) {
+      toast.info("You have reached the maximum projects that can be created");
+      return;
+    }
     setJoinModalIsOpen(false);
     setCreateModalIsOpen(!createModalIsOpen);
   };
@@ -48,10 +56,10 @@ const DashboardPage = () => {
     const newUserRooms = [...rooms];
     if (isAscOrder) {
       newUserRooms.sort((a, b) => {
-        if (a.projectName > b.projectName) {
+        if (a.projectName.toLocaleLowerCase() > b.projectName.toLocaleLowerCase()) {
           return 1;
         }
-        if (a.projectName < b.projectName) {
+        if (a.projectName.toLocaleLowerCase() < b.projectName.toLocaleLowerCase()) {
           return -1;
         }
         return 0;
@@ -59,10 +67,10 @@ const DashboardPage = () => {
       return newUserRooms;
     }
     newUserRooms.sort((a, b) => {
-      if (a.projectName < b.projectName) {
+      if (a.projectName.toLocaleLowerCase() < b.projectName.toLocaleLowerCase()) {
         return 1;
       }
-      if (a.projectName > b.projectName) {
+      if (a.projectName.toLocaleLowerCase() > b.projectName.toLocaleLowerCase()) {
         return -1;
       }
       return 0;
@@ -152,17 +160,20 @@ const DashboardPage = () => {
         setFilteredRooms(null);
         setUserRooms((prevState) => sortUpdatedAt(prevState, isAscending));
       }
-      if (value === "MyProjects" || value === "JoinedProjects") {
-        setFilteredRooms(filterRooms(value));
-      }
     },
-    [setUserRooms, filterRooms]
+    [setUserRooms]
   );
 
   const handleChange = (value: React.ReactNode) => {
     setSelectedSortValue(value as string);
     sortProject(value as string, isAscendingOrder);
   };
+
+  useEffect(() => {
+    if (selectedSortValue === "MyProjects" || selectedSortValue === "JoinedProjects") {
+      setFilteredRooms(filterRooms(selectedSortValue));
+    }
+  }, [filterRooms, selectedSortValue, userRooms]);
 
   const list = {
     visible: {
@@ -253,8 +264,8 @@ const DashboardPage = () => {
                 className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
               >
                 {!filteredRooms
-                  ? userRooms.map((doc) => <RoomCard key={doc.roomId} doc={doc} />)
-                  : filteredRooms.map((doc) => <RoomCard key={doc.roomId} doc={doc} />)}
+                  ? userRooms.map((doc) => <RoomCard setUserRooms={setUserRooms} key={doc.roomId} doc={doc} />)
+                  : filteredRooms.map((doc) => <RoomCard setUserRooms={setUserRooms} key={doc.roomId} doc={doc} />)}
               </motion.div>
             )}
           </div>

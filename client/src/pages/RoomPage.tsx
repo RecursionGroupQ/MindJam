@@ -148,7 +148,7 @@ const RoomPage = () => {
       pointerPosition = stage.getRelativePointerPosition();
       if (pointerPosition) {
         const id = nanoid();
-        const defaultBlockArray = htmlToDraft(`<p style="font-size: 30px;">Add Text</p>`);
+        const defaultBlockArray = htmlToDraft(`<p style="font-size: 18px;"></p>`);
         const contentState = ContentState.createFromBlockArray(
           defaultBlockArray.contentBlocks,
           defaultBlockArray.entityMap
@@ -230,8 +230,6 @@ const RoomPage = () => {
   // マウスドラッグで Canvas 内を移動
   const handleDragMove = (e: Konva.KonvaEventObject<DragEvent>) => {
     if (e.target === stageRef.current && canDragStage) {
-      console.log(e.target.getPointerPosition(), stageConfig.stageScale);
-      // console.log(e.target.x() * (1 - stageConfig.stageScale), e.target.y() * (1 - stageConfig.stageScale));
       setStageStyle((prevState) => ({
         ...prevState,
         backgroundPosition: `${e.target.x()}px ${e.target.y()}px`,
@@ -322,24 +320,6 @@ const RoomPage = () => {
     setSelectedShapes(selected as Konva.Group[]);
   };
 
-  // const boundFunc = (pos: Konva.Vector2d, scale: number) => {
-  //   // console.log(pos, scale);
-  //   const x = Math.min(0, Math.max(pos.x, 1000 * (0.1 - scale)));
-  //   const y = Math.min(0, Math.max(pos.y, 1000 * (0.1 - scale)));
-  //   // console.log(x, y);
-  //   // console.log(
-  //   //   Math.min(0, Math.max(pos.x, resizedCanvasWidth * (0.1 - scale))),
-  //   //   Math.min(0, Math.max(pos.y, resizedCanvasHeight * (0.1 - scale)))
-  //   // );
-
-  //   return {
-  //     x: pos.x,
-  //     y: pos.y,
-  //   };
-  // };
-
-  // const dragBoundFunc = (pos: Konva.Vector2d) => boundFunc(pos, stageConfig.stageScale);
-
   return (
     <>
       {isLoading && (
@@ -357,7 +337,7 @@ const RoomPage = () => {
               <Stage
                 style={stageStyle}
                 ref={stageRef}
-                className="-z-10 absolute top-0"
+                className="-z-10 absolute top-0 overflow-hidden"
                 scaleX={stageConfig.stageScale}
                 scaleY={stageConfig.stageScale}
                 x={stageConfig.stageX}

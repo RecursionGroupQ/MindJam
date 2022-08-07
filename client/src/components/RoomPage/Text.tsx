@@ -36,7 +36,6 @@ const Text: React.FC<Props> = ({ node, isEditing, onToggleEdit }) => {
   useEffect(() => {
     if (stageRef && stageRef.current && !isEditing) {
       (stageRef.current.content.children[0] as HTMLElement).style.pointerEvents = "none";
-
       if (textRef) {
         const child = textRef.current?.parentElement as HTMLDivElement;
         const parent = stageRef.current.container();

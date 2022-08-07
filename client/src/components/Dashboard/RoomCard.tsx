@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from "react";
 import {
   Card,
@@ -27,9 +26,10 @@ import useRenameRoom from "../../hooks/firebase/useRenameRoom";
 
 type Props = {
   doc: UserRoom;
+  setUserRooms: React.Dispatch<React.SetStateAction<UserRoom[]>>;
 };
 
-const RoomCard: React.FC<Props> = ({ doc }) => {
+const RoomCard: React.FC<Props> = ({ doc, setUserRooms }) => {
   const navigate = useNavigate();
   const { deleteRoom } = useDeleteRoom();
   const { leaveRoom } = useLeaveRoom();
@@ -41,18 +41,33 @@ const RoomCard: React.FC<Props> = ({ doc }) => {
 
   const handleDeleteSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setDeleteConfirmModalIsOpen(!deleteConfirmModalIsOpen);
     deleteRoom(doc.roomId).catch((err) => toast.error((err as Error).message));
+    setUserRooms((prevState) => prevState.filter((room) => room.roomId !== doc.roomId));
   };
 
   const handleLeaveSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setLeaveConfirmModalIsOpen(!leaveConfirmModalIsOpen);
     leaveRoom(doc.roomId).catch((err) => toast.error((err as Error).message));
+    setUserRooms((prevState) => prevState.filter((room) => room.roomId !== doc.roomId));
   };
 
   const handleRenameSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    renameRoom(doc.roomId, renamedProjectName).catch((err) => toast.error((err as Error).message));
     setRenameConfirmModalIsOpen(!renameConfirmModalIsOpen);
+    renameRoom(doc.roomId, renamedProjectName).catch((err) => toast.error((err as Error).message));
+    setUserRooms((prevState) =>
+      prevState.map((room) => {
+        if (room.roomId === doc.roomId) {
+          return {
+            ...room,
+            projectName: renamedProjectName,
+          };
+        }
+        return room;
+      })
+    );
   };
 
   const handleClick = (roomId: string) => {
@@ -96,7 +111,7 @@ const RoomCard: React.FC<Props> = ({ doc }) => {
           <div className="flex justify-end p-2">
             <Menu>
               <MenuHandler>
-                <Button size="sm" color="blue-grey">
+                <Button className="!p-2" size="sm" color="blue-grey">
                   <BsThreeDotsVertical />
                 </Button>
               </MenuHandler>
@@ -133,10 +148,10 @@ const RoomCard: React.FC<Props> = ({ doc }) => {
             <CardFooter divider className="flex items-center justify-between !px-6 !py-1">
               <div className="flex flex-col">
                 <Typography variant="small">
-                  <span className="font-bold">last updated:</span> {doc.updatedAt.toDate().toDateString()}
+                  <span className="font-bold">last updated:</span> {doc.updatedAt.toDate().toLocaleString()}
                 </Typography>
                 <Typography variant="small">
-                  <span className="font-bold">created:</span> {doc.createdAt.toDate().toDateString()}
+                  <span className="font-bold">created:</span> {doc.createdAt.toDate().toLocaleDateString()}
                 </Typography>
                 <Typography variant="small">
                   <span className="font-bold">owner:</span> {doc.role === "owner" ? "You" : doc.ownerName}
