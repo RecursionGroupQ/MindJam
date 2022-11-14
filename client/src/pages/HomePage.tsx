@@ -8,8 +8,8 @@ import Konva from "konva";
 import { CANVAS_WIDTH, CANVAS_HEIGHT } from "../context/RoomContext";
 import useLogin from "../hooks/useLogin";
 
-const userColors = ["#EF4444", "#F59E0B", "#10B981", "#3B82F6", "#6366F1", "#8B5CF6", "#EC4899"];
-// const colors = ["#a855f7", "#ec4899", "#ef4444", "#f97316", "#eab308", "#ffff00", "#ffffff", "#6b7280", "#000000"];
+const userColors = ["#EF4444", "#F59E0B", "#6366F1", "#8B5CF6", "#EC4899"];
+// const colors = ["#a855f7", "#ec4899", "#ef4444", "#f97316", "#eab308", "#ffffff"];
 
 const HomePage = () => {
   const [resizedCanvasWidth, setResizedCanvasWidth] = useState(CANVAS_WIDTH);
@@ -21,7 +21,7 @@ const HomePage = () => {
 
   // const generateRandomNodes = () => {
   //   const nodes: Node[] = [];
-  //   for (let i = 0; i < 3; i += 1) {
+  //   for (let i = 0; i < 2; i += 1) {
   //     const newNode: Node = {
   //       id: i.toString(),
   //       children: [],
@@ -30,9 +30,10 @@ const HomePage = () => {
   //       shapeType: "ellipse",
   //       x: Math.random() * resizedCanvasWidth,
   //       y: Math.random() * resizedCanvasHeight,
-  //       width: (Math.random() * (1.5 - 0.5) + 0.5) * 150,
+  //       width: (Math.random() * (2 - 1) + 1) * 200,
   //       height: 90,
-  //       fillStyle: colors[Math.floor(Math.random() * colors.length)],
+  //       // fillStyle: colors[Math.floor(Math.random() * colors.length)],
+  //       fillStyle: colors[5],
   //       strokeStyle: "#000",
   //     };
   //     nodes.push(newNode);
@@ -63,27 +64,45 @@ const HomePage = () => {
   };
 
   useEffect(() => {
-    // const period = 300;
-    const velocity = 350;
+    if (cursor1Ref.current) {
+      const anim1 = new Konva.Tween({
+        node: cursor1Ref.current,
+        duration: 2.5,
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        easing: Konva.Easings.StrongEaseInOut,
+        x: 150,
+        y: 200,
+      });
 
-    const anim = new Konva.Animation((frame) => {
-      if (frame) {
-        const dist = (velocity * frame.timeDiff) / 1000;
-        cursor1Ref.current?.move({ x: dist, y: dist });
-        cursor2Ref.current?.move({ x: -dist, y: dist });
-        cursor3Ref.current?.move({ x: -dist, y: -dist });
-        if (cursor1Ref.current?.getPosition() && cursor1Ref.current?.getPosition().x > 400) {
-          anim.stop();
-        }
-      }
-    }, cursor1Ref.current?.getLayer());
+      anim1.play();
+    }
 
-    anim.start();
+    if (cursor2Ref.current) {
+      const anim2 = new Konva.Tween({
+        node: cursor2Ref.current,
+        duration: 3,
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        easing: Konva.Easings.EaseInOut,
+        x: resizedCanvasWidth - 100,
+        y: 250,
+      });
 
-    return () => {
-      anim.stop();
-    };
-  }, []);
+      anim2.play();
+    }
+
+    if (cursor3Ref.current) {
+      const anim3 = new Konva.Tween({
+        node: cursor3Ref.current,
+        duration: 4,
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        easing: Konva.Easings.StrongEaseInOut,
+        x: resizedCanvasWidth / 2 + 150,
+        y: resizedCanvasHeight - 100,
+      });
+
+      anim3.play();
+    }
+  }, [resizedCanvasWidth, resizedCanvasHeight]);
 
   return (
     <div>
