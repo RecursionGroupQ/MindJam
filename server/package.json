@@ -5,7 +5,7 @@
   "main": "dist/server.js",
   "scripts": {
     "prepare": "cd .. && husky install .husky",
-    "build": "tsc",
+    "build": "npm install && tsc",
     "watch": "tsc -w",
     "dev": "concurrently --kill-others \"npm run watch \" \"nodemon .\"",
     "start": "node .",
