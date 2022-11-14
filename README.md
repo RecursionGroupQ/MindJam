@@ -1,6 +1,6 @@
 
 <h1 align="center">
-  MindJam <img src="../mindmap/client/public/favicon.svg" />
+  MindJam <img src="./client/public/favicon.svg" />
   <br>
 </h1>
 
